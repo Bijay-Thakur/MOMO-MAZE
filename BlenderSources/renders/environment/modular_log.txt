@@ -1,0 +1,37 @@
+﻿00:05.609  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\environment\modular_pieces_lineup.png'
+00:05.625  image.write      | ERROR OpenImageIO write failed: Could not open file "C:\Users\starb\.thumbnails\large\blender_39224_41b51d9d0e9cb560f21d282524adfbd1.png.png"
+BlenderMCP addon registered
+BlenderMCP addon unregistered
+Generating all Modular Environment Pieces...
+  ✓ Rendered Modular Pieces Lineup -> D:\Projects\MOMO MAZE\BlenderSources\renders\environment\modular_pieces_lineup.png
+Info: Saved as "environment_modular.blend"
+Saved .blend: D:\Projects\MOMO MAZE\BlenderSources\scenes\environment_modular.blend
+
+FBX export starting... 'D:\\Projects\\MOMO MAZE\\BlenderSources\\exports\\fbx\\SM_Hedge_Straight.fbx'
+export finished in 0.0110 sec.
+  Exported FBX: D:\Projects\MOMO MAZE\BlenderSources\exports\fbx\SM_Hedge_Straight.fbx
+
+FBX export starting... 'D:\\Projects\\MOMO MAZE\\BlenderSources\\exports\\fbx\\SM_Hedge_Corner.fbx'
+export finished in 0.0067 sec.
+  Exported FBX: D:\Projects\MOMO MAZE\BlenderSources\exports\fbx\SM_Hedge_Corner.fbx
+
+FBX export starting... 'D:\\Projects\\MOMO MAZE\\BlenderSources\\exports\\fbx\\SM_Path_Tile.fbx'
+export finished in 0.0032 sec.
+  Exported FBX: D:\Projects\MOMO MAZE\BlenderSources\exports\fbx\SM_Path_Tile.fbx
+
+FBX export starting... 'D:\\Projects\\MOMO MAZE\\BlenderSources\\exports\\fbx\\SM_Momo_Collectible.fbx'
+export finished in 0.0059 sec.
+  Exported FBX: D:\Projects\MOMO MAZE\BlenderSources\exports\fbx\SM_Momo_Collectible.fbx
+
+FBX export starting... 'D:\\Projects\\MOMO MAZE\\BlenderSources\\exports\\fbx\\SM_Leaf_Gate.fbx'
+export finished in 0.0267 sec.
+  Exported FBX: D:\Projects\MOMO MAZE\BlenderSources\exports\fbx\SM_Leaf_Gate.fbx
+
+FBX export starting... 'D:\\Projects\\MOMO MAZE\\BlenderSources\\exports\\fbx\\SM_Flower_Cluster.fbx'
+export finished in 0.0287 sec.
+  Exported FBX: D:\Projects\MOMO MAZE\BlenderSources\exports\fbx\SM_Flower_Cluster.fbx
+=== Modular Environment Assets Production Complete ===
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+
+Blender quit
+

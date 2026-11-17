@@ -1,0 +1,43 @@
+﻿00:12.750  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\ghosts\ghosts_v003_lineup.png'
+00:17.219  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\ghosts\ghost_v003_follower_front.png'
+00:20.141  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\ghosts\ghost_v003_follower_34.png'
+00:23.313  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\ghosts\ghost_v003_follower_side.png'
+00:25.547  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\ghosts\ghost_v003_cutter_front.png'
+00:28.328  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\ghosts\ghost_v003_cutter_34.png'
+00:31.266  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\ghosts\ghost_v003_cutter_side.png'
+00:33.422  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\ghosts\ghost_v003_wanderer_front.png'
+00:36.047  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\ghosts\ghost_v003_wanderer_34.png'
+00:39.188  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\ghosts\ghost_v003_wanderer_side.png'
+00:39.203  image.write      | ERROR OpenImageIO write failed: Could not open file "C:\Users\starb\.thumbnails\large\blender_18752_a9ec432c501f508936be99650a56ecdf.png.png"
+BlenderMCP addon registered
+BlenderMCP addon unregistered
+Building ghosts v003 …
+  ✓ lineup
+  ✓ follower_front
+  ✓ follower_34
+  ✓ follower_side
+  ✓ cutter_front
+  ✓ cutter_34
+  ✓ cutter_side
+  ✓ wanderer_front
+  ✓ wanderer_34
+  ✓ wanderer_side
+Info: Saved as "ghosts_v003.blend"
+Saved: D:\Projects\MOMO MAZE\BlenderSources\scenes\ghosts_v003.blend
+
+FBX export starting... 'D:\\Projects\\MOMO MAZE\\BlenderSources\\exports\\fbx\\ghost_follower_v003.fbx'
+export finished in 0.0118 sec.
+  FBX: D:\Projects\MOMO MAZE\BlenderSources\exports\fbx\ghost_follower_v003.fbx
+
+FBX export starting... 'D:\\Projects\\MOMO MAZE\\BlenderSources\\exports\\fbx\\ghost_cutter_v003.fbx'
+export finished in 0.0090 sec.
+  FBX: D:\Projects\MOMO MAZE\BlenderSources\exports\fbx\ghost_cutter_v003.fbx
+
+FBX export starting... 'D:\\Projects\\MOMO MAZE\\BlenderSources\\exports\\fbx\\ghost_wanderer_v003.fbx'
+export finished in 0.0163 sec.
+  FBX: D:\Projects\MOMO MAZE\BlenderSources\exports\fbx\ghost_wanderer_v003.fbx
+=== Ghost v003 build COMPLETE ===
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+
+Blender quit
+

@@ -1,0 +1,7 @@
+﻿D:\Projects\MOMO MAZE\BlenderSources\scripts\build_ghosts_v005.py:55: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mat.use_nodes = True
+D:\Projects\MOMO MAZE\BlenderSources\scripts\build_ghosts_v005.py:93: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mat.use_nodes = True
+D:\Projects\MOMO MAZE\BlenderSources\scripts\build_ghosts_v005.py:553: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world.use_nodes = True
+

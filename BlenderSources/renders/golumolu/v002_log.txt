@@ -1,0 +1,25 @@
+﻿00:10.453  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\golumolu\golumolu_v002_front.png'
+00:18.562  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\golumolu\golumolu_v002_34view.png'
+00:28.984  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\golumolu\golumolu_v002_side.png'
+00:42.265  render           | Saved: 'D:\Projects\MOMO MAZE\BlenderSources\renders\golumolu\golumolu_v002_back.png'
+00:42.328  image.write      | ERROR OpenImageIO write failed: Could not open file "C:\Users\starb\.thumbnails\large\blender_20404_6b24a2d9e16c7438ca93c6d37b0fb584.png.png"
+BlenderMCP addon registered
+BlenderMCP addon unregistered
+=== Golumolu v002 build starting ===
+Mesh built – v002 corrections applied.
+Rendering 4 validation views …
+  ✓ front: D:\Projects\MOMO MAZE\BlenderSources\renders\golumolu\golumolu_v002_front.png
+  ✓ 34view: D:\Projects\MOMO MAZE\BlenderSources\renders\golumolu\golumolu_v002_34view.png
+  ✓ side: D:\Projects\MOMO MAZE\BlenderSources\renders\golumolu\golumolu_v002_side.png
+  ✓ back: D:\Projects\MOMO MAZE\BlenderSources\renders\golumolu\golumolu_v002_back.png
+Info: Saved as "golumolu_v002.blend"
+Saved: D:\Projects\MOMO MAZE\BlenderSources\scenes\golumolu_v002.blend
+
+FBX export starting... 'D:\\Projects\\MOMO MAZE\\BlenderSources\\exports\\fbx\\golumolu_v002.fbx'
+export finished in 0.0964 sec.
+FBX: D:\Projects\MOMO MAZE\BlenderSources\exports\fbx\golumolu_v002.fbx
+=== Golumolu v002 COMPLETE ===
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+
+Blender quit
+

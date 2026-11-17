@@ -1,0 +1,15 @@
+# Unreal Engine
+UnrealProject/Binaries/
+UnrealProject/Build/
+UnrealProject/DerivedDataCache/
+UnrealProject/Intermediate/
+UnrealProject/Saved/
+.vscode/
+.vs/
+*.VC.db
+*.opendb
+
+# Blender backup files
+*.blend1
+*.blend2
+*.blend@*

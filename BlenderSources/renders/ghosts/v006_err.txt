@@ -1,0 +1,9 @@
+﻿D:\Projects\MOMO MAZE\BlenderSources\scripts\build_ghosts_v006.py:6: SyntaxWarning: invalid escape sequence '\ '
+  - Cutter (Clever, tricky, sharp inward angled eyes \ /, dynamic crest)
+D:\Projects\MOMO MAZE\BlenderSources\scripts\build_ghosts_v006.py:54: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mat.use_nodes = True
+D:\Projects\MOMO MAZE\BlenderSources\scripts\build_ghosts_v006.py:92: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mat.use_nodes = True
+D:\Projects\MOMO MAZE\BlenderSources\scripts\build_ghosts_v006.py:541: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world.use_nodes = True
+

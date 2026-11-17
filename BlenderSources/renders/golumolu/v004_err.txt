@@ -1,0 +1,5 @@
+﻿D:\Projects\MOMO MAZE\BlenderSources\scripts\golumolu_v004.py:56: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mat.use_nodes = True
+D:\Projects\MOMO MAZE\BlenderSources\scripts\golumolu_v004.py:316: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world.use_nodes = True
+
