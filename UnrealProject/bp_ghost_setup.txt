@@ -1,0 +1,6 @@
+Found root_handle: <Struct 'SubobjectDataHandle' (0x000002289CBC66A0) {}>, capsule: <Object '/Game/Blueprints/Core/BP_SpiritCharacter.Default__BP_SpiritCharacter_C:CollisionCylinder' (0x000002289CF71500) Class 'CapsuleComponent'>, move: <Object '/Game/Blueprints/Core/BP_SpiritCharacter.Default__BP_SpiritCharacter_C:CharMoveComp' (0x00000228A0080000) Class 'CharacterMovementComponent'>
+Configured Ghost CapsuleComponent (35r, 50h)
+Configured Ghost Movement (speed 330)
+Added Ghost StaticMesh: fail=
+Configured Ghost Mesh Component with SK_Ghost_Follower & M_Ghost_Master
+BP_SpiritCharacter setup successfully completed and saved!

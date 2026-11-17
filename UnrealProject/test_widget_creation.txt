@@ -1,0 +1,8 @@
+Created WidgetBlueprint: <Object '/Game/UI/WBP_TestWidget.WBP_TestWidget' (0x0000017565FC1500) Class 'WidgetBlueprint'>
+Error: WidgetBlueprint: Failed to find property 'widget_tree' for attribute 'widget_tree' on 'WidgetBlueprint'
+Traceback (most recent call last):
+  File "D:/Projects/MOMO MAZE/UnrealProject/test_create_widget.py", line 21, in <module>
+    tree = widget_bp.get_editor_property("widget_tree")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception: WidgetBlueprint: Failed to find property 'widget_tree' for attribute 'widget_tree' on 'WidgetBlueprint'
+

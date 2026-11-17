@@ -1,0 +1,8 @@
+Connected BaseColor: True
+Error: type object 'MaterialEditingLibrary' has no attribute 'update_material'
+Traceback (most recent call last):
+  File "D:/Projects/MOMO MAZE/UnrealProject/test_mat_edit.py", line 21, in <module>
+    unreal.MaterialEditingLibrary.update_material(mat)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'MaterialEditingLibrary' has no attribute 'update_material'
+

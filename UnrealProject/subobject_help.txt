@@ -1,0 +1,14 @@
+Help on built-in function add_new_subobject:
+
+add_new_subobject(...) method of builtins.SubobjectDataSubsystem instance
+    x.add_new_subobject(params) -> (SubobjectDataHandle, fail_reason=Text)
+    Add a new subobject as a child to the given parent object
+    
+    Args:
+        params (AddNewSubobjectParams): Options to consider when adding this subobject
+    
+    Returns:
+        Text: FSubobjectDataHandle          Handle to the newly created subobject, Invalid handle if creation failed
+    
+        fail_reason (Text):
+

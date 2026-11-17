@@ -1,0 +1,13 @@
+Starting UE 5.8 Master Asset Import...
+Importing Master FBX Assets into Unreal Engine 5.8...
+  ✓ Imported -> /Game/MomoMaze/Meshes/Characters/golumolu_validated
+  ✓ Imported -> /Game/MomoMaze/Meshes/Characters/ghost_follower_validated
+  ✓ Imported -> /Game/MomoMaze/Meshes/Characters/ghost_cutter_validated
+  ✓ Imported -> /Game/MomoMaze/Meshes/Characters/ghost_wanderer_validated
+  ✓ Imported -> /Game/MomoMaze/Meshes/Environment/SM_Hedge_Straight
+  ✓ Imported -> /Game/MomoMaze/Meshes/Environment/SM_Hedge_Corner
+  ✓ Imported -> /Game/MomoMaze/Meshes/Environment/SM_Path_Tile
+  ✓ Imported -> /Game/MomoMaze/Meshes/Environment/SM_Leaf_Gate
+  ✓ Imported -> /Game/MomoMaze/Meshes/Environment/SM_Momo_Collectible
+  ✓ Imported -> /Game/MomoMaze/Meshes/Environment/SM_Flower_Cluster
+All assets imported and saved into Unreal Engine project successfully!

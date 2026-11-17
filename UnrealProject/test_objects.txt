@@ -1,0 +1,5 @@
+Handle Name: None, Display: BP_GolumoluCharacter, Obj: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C' (0x000001EA89856E00) Class 'BP_GolumoluCharacter_C'> (<class 'Character'>)
+Handle Name: CapsuleComponent, Display: CollisionCylinder, Obj: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C:CollisionCylinder' (0x000001EA81FB1500) Class 'CapsuleComponent'> (<class 'CapsuleComponent'>)
+Handle Name: ArrowComponent, Display: Arrow, Obj: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C:Arrow' (0x000001EA81FB2300) Class 'ArrowComponent'> (<class 'ArrowComponent'>)
+Handle Name: Mesh, Display: CharacterMesh0, Obj: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C:CharacterMesh0' (0x000001EA89861400) Class 'SkeletalMeshComponent'> (<class 'SkeletalMeshComponent'>)
+Handle Name: CharacterMovement, Display: CharMoveComp, Obj: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C:CharMoveComp' (0x000001EA89860000) Class 'CharacterMovementComponent'> (<class 'CharacterMovementComponent'>)

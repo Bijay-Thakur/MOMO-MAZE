@@ -1,0 +1,2 @@
+Map: <Object '/Game/MomoMaze/Maps/M_Maze_31x31.M_Maze_31x31' (0x000001F415797E00) Class 'World'>
+Total Actors: 0

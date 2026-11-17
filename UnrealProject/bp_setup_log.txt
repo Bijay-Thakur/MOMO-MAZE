@@ -1,0 +1,7 @@
+Root handle: <Struct 'SubobjectDataHandle' (0x000001377DBD5D30) {}>
+Error: 'SubobjectDataHandle' object has no attribute 'is_valid'
+Traceback (most recent call last):
+  File "D:/Projects/MOMO MAZE/UnrealProject/test_add_components.py", line 19, in <module>
+    f.write(f"Added SpringArm: {arm_handle.is_valid()}, fail: {fail}\n")
+                                ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SubobjectDataHandle' object has no attribute 'is_valid'

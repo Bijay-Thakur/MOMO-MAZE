@@ -1,0 +1,2 @@
+CharacterMovement has orient_rotation_to_movement: True
+CharacterMovement has b_orient_rotation_to_movement: False

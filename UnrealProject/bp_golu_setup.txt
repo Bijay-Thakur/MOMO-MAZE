@@ -1,0 +1,10 @@
+Found root_handle: <Struct 'SubobjectDataHandle' (0x000001481C2D6ED0) {}>, capsule: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C:CollisionCylinder' (0x000001481C741500) Class 'CapsuleComponent'>, move: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C:CharMoveComp' (0x0000014820040000) Class 'CharacterMovementComponent'>
+Configured CapsuleComponent (45r, 60h)
+Configured CharacterMovement (speed 450, orient rotation)
+Added Golumolu StaticMesh: fail=
+Configured Golumolu Mesh Component with SK_Golumolu & M_Golumolu_Fur
+Added SpringArm: fail=
+Configured SpringArm (1350 length, -54 pitch)
+Added Camera: fail=
+Configured Camera (FOV 52)
+BP_GolumoluCharacter setup successfully completed and saved!

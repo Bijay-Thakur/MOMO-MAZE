@@ -1,0 +1,58 @@
+=== MOMO MAZE RUNTIME GAMEPLAY SIMULATION TEST ===
+Level loaded. Total actors in level: 1018
+Asset Verification:
+  - Solid Hedge Walls: 499 (expected 499)
+  - Walkable Floors: 462 (expected 462)
+  - Moving Gates Phase A: 3 (expected 3)
+  - Moving Gates Phase B: 3 (expected 3)
+  - Momo Dumpling Collectibles: 21 (expected 21)
+  - Ghost Spirits: 3 (expected 3: Follower, Cutter, Wanderer)
+  - Exit Leaf Gate: Found at <Struct 'Vector' (0x000001B9144CCF10) {x: 0.000000, y: -2520.000000, z: 0.000000}>
+  - Player Start: Found at <Struct 'Vector' (0x000001B9144CCF60) {x: 0.000000, y: 360.000000, z: 80.000000}>
+
+--- Testing Moving Gate Phase Shift ---
+  Gate A 'MovingGate_A_11_7' initial Z: 0.0 (Passable=False)
+  Gate A 'MovingGate_A_7_15' initial Z: 0.0 (Passable=False)
+  Gate A 'MovingGate_A_19_23' initial Z: 0.0 (Passable=False)
+  Gate B 'MovingGate_B_19_7' initial Z: -250.0 (Passable=True)
+  Gate B 'MovingGate_B_23_15' initial Z: -250.0 (Passable=True)
+  Gate B 'MovingGate_B_11_23' initial Z: -250.0 (Passable=True)
+  Triggering Phase Transition: Phase A -> Phase B...
+  Phase B confirmed: Gate A lowered to -250 (Passable), Gate B raised to 0 (Blocking).
+  Gates restored to Phase A default.
+
+--- Testing Momo Dumpling Collection Loop ---
+  Player begins at PlayerStart: <Struct 'Vector' (0x000001B9144CD190) {x: 0.000000, y: 360.000000, z: 80.000000}>
+  [Momo 1/21] Collected at (-2160, -2160) -> HUD Counter: 1/21
+  [Momo 2/21] Collected at (-1440, -2160) -> HUD Counter: 2/21
+  [Momo 3/21] Collected at (-720, -2160) -> HUD Counter: 3/21
+  [Momo 4/21] Collected at (720, -2160) -> HUD Counter: 4/21
+  [Momo 5/21] Collected at (1440, -2160) -> HUD Counter: 5/21
+  [Momo 6/21] Collected at (2160, -2160) -> HUD Counter: 6/21
+  [Momo 7/21] Collected at (-1440, -1440) -> HUD Counter: 7/21
+  [Momo 8/21] Collected at (1440, -1440) -> HUD Counter: 8/21
+  [Momo 9/21] Collected at (-2160, -720) -> HUD Counter: 9/21
+  [Momo 10/21] Collected at (2160, -720) -> HUD Counter: 10/21
+  [Momo 11/21] Collected at (0, 0) -> HUD Counter: 11/21
+  [Momo 12/21] Collected at (-2160, 720) -> HUD Counter: 12/21
+  [Momo 13/21] Collected at (2160, 720) -> HUD Counter: 13/21
+  [Momo 14/21] Collected at (-1440, 1440) -> HUD Counter: 14/21
+  [Momo 15/21] Collected at (1440, 1440) -> HUD Counter: 15/21
+  [Momo 16/21] Collected at (-2160, 2160) -> HUD Counter: 16/21
+  [Momo 17/21] Collected at (-1440, 2160) -> HUD Counter: 17/21
+  [Momo 18/21] Collected at (-720, 2160) -> HUD Counter: 18/21
+  [Momo 19/21] Collected at (720, 2160) -> HUD Counter: 19/21
+  [Momo 20/21] Collected at (1440, 2160) -> HUD Counter: 20/21
+  [Momo 21/21] Collected at (2160, 2160) -> HUD Counter: 21/21
+  ✓ All 21 Momos collected! Leaf Gate Unlock Condition: TRUE
+
+--- Testing Leaf Gate Victory Trigger ---
+  Player arrived at Exit Leaf Gate (0, -2520), Distance: 0.0
+  VICTORY EVALUATION: momos_collected=21/21 -> VICTORY ACHIEVED! 🏆
+
+--- Testing Ghost Encounter & 3-Heart Health System ---
+  Initial Golumolu Hearts: 3 (❤️❤️❤️)
+  Ghost 'Ghost_Follower' encountered at (-720, 0)
+  Golumolu hit by Ghost! Hearts remaining: 2 (❤️❤️🖤), Invulnerability: 2.0s
+
+=== ALL RUNTIME GAMEPLAY SYSTEMS VERIFIED & VALIDATED SUCCESSFULLY! ===

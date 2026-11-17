@@ -1,0 +1,10 @@
+/Game/MomoMaze/Meshes/Environment/SM_Hedge_Straight -> <Object '/Game/MomoMaze/Meshes/Environment/SM_Hedge_Straight.SM_Hedge_Straight' (0x000002341A5ED000) Class 'StaticMesh'>
+/Game/MomoMaze/Meshes/Environment/SM_Path_Tile -> <Object '/Game/MomoMaze/Meshes/Environment/SM_Path_Tile.SM_Path_Tile' (0x000002341A5EF000) Class 'StaticMesh'>
+/Game/MomoMaze/Meshes/Environment/SM_Momo_Collectible -> <Object '/Game/MomoMaze/Meshes/Environment/SM_Momo_Collectible.SM_Momo_Collectible' (0x000002341D1A0000) Class 'StaticMesh'>
+/Game/MomoMaze/Meshes/Environment/SM_Leaf_Gate -> <Object '/Game/MomoMaze/Meshes/Environment/SM_Leaf_Gate.SM_Leaf_Gate' (0x000002341D1A0800) Class 'StaticMesh'>
+/Game/MomoMaze/Meshes/Characters/golumolu_validated -> <Object '/Game/MomoMaze/Meshes/Characters/golumolu_validated.golumolu_validated' (0x000002341D1A1800) Class 'StaticMesh'>
+/Game/MomoMaze/Meshes/Characters/ghost_follower_validated -> <Object '/Game/MomoMaze/Meshes/Characters/ghost_follower_validated.ghost_follower_validated' (0x000002341D1A2000) Class 'StaticMesh'>
+/Game/MomoMaze/Meshes/Characters/ghost_cutter_validated -> <Object '/Game/MomoMaze/Meshes/Characters/ghost_cutter_validated.ghost_cutter_validated' (0x000002341D1A2800) Class 'StaticMesh'>
+/Game/MomoMaze/Meshes/Characters/ghost_wanderer_validated -> <Object '/Game/MomoMaze/Meshes/Characters/ghost_wanderer_validated.ghost_wanderer_validated' (0x000002341D1A3000) Class 'StaticMesh'>
+/Game/Meshes/Environment/SM_Hedge_Straight -> <Object '/Game/Meshes/Environment/SM_Hedge_Straight.SM_Hedge_Straight' (0x000002341D1A4000) Class 'StaticMesh'>
+/Game/Meshes/Environment/SM_Path_Tile -> <Object '/Game/Meshes/Environment/SM_Path_Tile.SM_Path_Tile' (0x000002341D1A5000) Class 'StaticMesh'>

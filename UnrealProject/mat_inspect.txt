@@ -1,0 +1,2 @@
+Loaded mat: <Object '/Game/Materials/UI/M_UI_Cream.M_UI_Cream' (0x000001C665EA7E00) Class 'Material'>
+Material graph nodes: -1

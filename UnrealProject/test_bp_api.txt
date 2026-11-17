@@ -1,0 +1,3 @@
+SubobjectDataSubsystem: <Object '/Engine/Transient.EditorEngine_0:SubobjectDataSubsystem_0' (0x000001AE557EF820) Class 'SubobjectDataSubsystem'>
+BP_GolumoluCharacter: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.BP_GolumoluCharacter' (0x000001AE6E6DE400) Class 'Blueprint'>
+GeneratedClass: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.BP_GolumoluCharacter_C' (0x000001AE6E7E1500) Class 'BlueprintGeneratedClass'>

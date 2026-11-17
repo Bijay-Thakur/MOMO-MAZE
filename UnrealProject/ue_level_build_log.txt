@@ -1,0 +1,12 @@
+=== Building 31x31 MOMO MAZE Level in Unreal Engine 5.8 ===
+Loading existing level: /Game/MomoMaze/Maps/M_Maze_31x31
+Cleared 0 previous actors from level.
+Loading Maze JSON...
+Assets loaded: hedge=True, floor=True, momo=True, gate=True
+Grid placed: 499 Walls, 462 Floors, 6 Moving Gates, 21 Momos, 18 Flower clusters.
+PlayerStart placed at (0.0, 360.0, 80)
+Placed Ghost_Follower at cell (11, 15)
+Placed Ghost_Cutter at cell (19, 15)
+Placed Ghost_Wanderer at cell (15, 25)
+Level Saved: True. Total actors now in level: 1017
+SUCCESS: M_Maze_31x31 level generated and saved with all assets and lighting!
