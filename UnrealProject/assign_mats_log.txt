@@ -1,0 +1,8 @@
+=== Assigning Beautiful Existing Materials to Golumolu ===
+Loaded mats: green=<Object '/Game/Materials/UI/M_UI_LeafGreen.M_UI_LeafGreen' (0x00000293F4601C00) Class 'Material'>, gold=<Object '/Game/Materials/UI/M_UI_Gold.M_UI_Gold' (0x00000293F4603800) Class 'Material'>, coral=<Object '/Game/Materials/UI/M_UI_CoralHeart.M_UI_CoralHeart' (0x00000293F4606200) Class 'Material'>, white=<Object '/Game/Materials/UI/M_UI_SpiritWhite.M_UI_SpiritWhite' (0x00000293F4608C00) Class 'Material'>, dark=<Object '/Game/Materials/UI/M_UI_ToastBrown.M_UI_ToastBrown' (0x00000293F460B600) Class 'Material'>
+Saved SK_Golumolu with all 7 colorful materials!
+SpringArm updated: arm_length=1300, pitch=-48
+StaticMeshComponent materials updated on Blueprint
+BP_GolumoluCharacter compiled and saved!
+WorldSettings note: WorldSettings: Failed to find property 'b_force_no_precomputed_lighting' for attribute 'b_force_no_precomputed_lighting' on 'WorldSettings'
+Saved M_Maze_31x31!

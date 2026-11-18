@@ -17,3 +17,7 @@ Builds/
 *.blend1
 *.blend2
 *.blend@*
+
+# Node / Web
+node_modules/
+WebGame/node_modules/

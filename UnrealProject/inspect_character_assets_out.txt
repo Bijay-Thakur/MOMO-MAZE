@@ -1,0 +1,8 @@
+SK_Golumolu: <Object '/Game/Meshes/Characters/SK_Golumolu.SK_Golumolu' (0x0000027281CC8000) Class 'StaticMesh'> (Class: StaticMesh)
+golumolu_validated: <Object '/Game/MomoMaze/Meshes/Characters/golumolu_validated.golumolu_validated' (0x00000273D2F58000) Class 'StaticMesh'> (Class: StaticMesh)
+M_Golumolu_Fur: <Object '/Game/Materials/Characters/M_Golumolu_Fur.M_Golumolu_Fur' (0x00000273AC347E00) Class 'Material'> (Class: Material)
+BP_MomoPlayerController: <Object '/Game/Blueprints/Core/BP_MomoPlayerController.BP_MomoPlayerController' (0x00000273D116C000) Class 'Blueprint'>
+  PC CDO: <Object '/Game/Blueprints/Core/BP_MomoPlayerController.Default__BP_MomoPlayerController_C' (0x000002738DFFDC00) Class 'BP_MomoPlayerController_C'>
+  show_mouse_cursor: True
+  enable_click_events: True
+  enable_touch_events: True

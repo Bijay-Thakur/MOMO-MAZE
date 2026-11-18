@@ -1,0 +1,9 @@
+SK_Golumolu: <Object '/Game/Meshes/Characters/SK_Golumolu.SK_Golumolu' (0x000001FE0F7E9800) Class 'StaticMesh'>
+static_materials count: 7
+  slot 0: M_Golumolu_Peach_Accent -> <Object '/Game/Materials/Characters/M_Golumolu_Fur.M_Golumolu_Fur' (0x000001FE2FE94600) Class 'Material'>
+  slot 1: M_Golumolu_Cheeks -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000001FD8710D200) Class 'Material'>
+  slot 2: M_Golumolu_Fluffy_Fur -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000001FD8710D200) Class 'Material'>
+  slot 3: M_Golumolu_Eyes -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000001FD8710D200) Class 'Material'>
+  slot 4: M_Golumolu_Mouth -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000001FD8710D200) Class 'Material'>
+  slot 5: M_Golumolu_Eye_Shine -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000001FD8710D200) Class 'Material'>
+  slot 6: M_Golumolu_Tongue -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000001FD8710D200) Class 'Material'>

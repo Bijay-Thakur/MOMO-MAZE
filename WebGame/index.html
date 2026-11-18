@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MOMO MAZE – A Cozy Garden Adventure</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 3D Canvas Container -->
+  <div id="game-container"></div>
+
+  <!-- UI Screens Layer -->
+  <div id="ui-layer">
+
+    <!-- Screen 01/02: Main Menu -->
+    <div id="screen-menu" class="screen active">
+      <div class="menu-brand">
+        <h1 class="menu-title">MOMO MAZE</h1>
+        <p class="menu-subtitle">🌸 A Cozy Garden Adventure 🌸</p>
+      </div>
+
+      <div class="menu-center-card">
+        <button id="btn-play-campaign" class="btn">
+          <span>▶</span> Play Campaign (25 Levels)
+        </button>
+        <button id="btn-play-grand-31" class="btn btn-green">
+          <span>🏰</span> Play 31×31 Grand Maze
+        </button>
+        <button id="btn-open-closet" class="btn btn-secondary">
+          <span>🧸</span> Golumolu's Closet
+        </button>
+        <button id="btn-open-spirits" class="btn btn-secondary">
+          <span>📖</span> Spirit Book
+        </button>
+        <button id="btn-open-settings" class="btn btn-secondary">
+          <span>⚙️</span> Settings & Controls
+        </button>
+      </div>
+
+      <div class="menu-bottom-bar">
+        <div class="controls-hint">
+          ⌨️ Controls: <strong>W A S D</strong> or <strong>Arrow Keys</strong> to move | <strong>M</strong> Map | <strong>P</strong> Pause | <strong>C</strong> Camera
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen: Campaign Level Select (25 Levels across Chapters) -->
+    <div id="screen-levels" class="screen modal-overlay">
+      <div class="card-dialog">
+        <div class="card-header">
+          <h2>Garden Campaign</h2>
+          <p class="subtitle">Choose your adventure chapter & level</p>
+        </div>
+        <div class="scrollable-body" id="levels-grid"></div>
+        <div class="buttons-row">
+          <button class="btn btn-secondary btn-back-to-menu">← Back to Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen: Golumolu Closet (Skins & Hats) -->
+    <div id="screen-closet" class="screen modal-overlay">
+      <div class="card-dialog">
+        <div class="card-header">
+          <h2>Golumolu's Closet</h2>
+          <p class="subtitle">Dress up Golumolu in cozy styles!</p>
+        </div>
+        <div id="closet-skins-list"></div>
+        <div class="buttons-row">
+          <button class="btn btn-back-to-menu">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen: Spirit Book (Lore & Strategy) -->
+    <div id="screen-spirits" class="screen modal-overlay">
+      <div class="card-dialog">
+        <div class="card-header">
+          <h2>Garden Spirit Book</h2>
+          <p class="subtitle">Learn about the friendly garden spirits</p>
+        </div>
+        <div id="spirits-list"></div>
+        <div class="buttons-row">
+          <button class="btn btn-secondary btn-back-to-menu">← Back</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen: Settings & Controls -->
+    <div id="screen-settings" class="screen modal-overlay">
+      <div class="card-dialog">
+        <div class="card-header">
+          <h2>Settings</h2>
+          <p class="subtitle">Configure your cozy experience</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:18px; margin:16px 0 28px 0; text-align:left;">
+          <label style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:600;">
+            <span>🔊 Sound Effects & Ambient Music</span>
+            <input type="checkbox" id="chk-mute" style="width:20px; height:20px; cursor:pointer;">
+          </label>
+          <label style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:600;">
+            <span>🎥 Camera View</span>
+            <select id="sel-camera-mode" style="padding:8px 14px; border-radius:12px; border:2px solid #FFE0B2; font-size:15px; background:#fff; font-weight:600;">
+              <option value="iso">Cozy 3/4 Isometric</option>
+              <option value="top">Top-Down Bird's Eye</option>
+            </select>
+          </label>
+          <div style="background:#FFF8E1; padding:14px; border-radius:14px; font-size:14px; line-height:1.5;">
+            <strong>⌨️ Keyboard Shortcuts:</strong><br>
+            • <strong>W, A, S, D</strong> or <strong>Arrows</strong>: Move Golumolu<br>
+            • <strong>Mouse Wheel</strong>: Zoom Camera in/out<br>
+            • <strong>C</strong>: Switch Camera Angle<br>
+            • <strong>M</strong>: Fullscreen Blueprint Map<br>
+            • <strong>P / Esc</strong>: Pause Game
+          </div>
+        </div>
+        <div class="buttons-row">
+          <button class="btn btn-back-to-menu">Save & Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 08: In-Game HUD -->
+    <div id="screen-hud" class="screen">
+      <!-- Top Bar -->
+      <div class="hud-top-bar">
+        <div class="hud-pill" id="hud-lives">❤️ ❤️ ❤️</div>
+
+        <div class="hud-center-widgets">
+          <div class="hud-pill" id="hud-momos">🥟 0 / 6</div>
+          <div class="hud-pill" id="hud-gate-phase">Phase A</div>
+          <div class="hud-pill" id="hud-gate-timer">8s</div>
+        </div>
+
+        <div class="hud-right-widgets">
+          <div class="hud-pill" id="hud-timer">⏱️ 0:00</div>
+          <button id="btn-hud-map" class="btn btn-secondary btn-round" title="Toggle Map (M)">🗺️</button>
+          <button id="btn-hud-camera" class="btn btn-secondary btn-round" title="Toggle Camera (C)">🎥</button>
+          <button id="btn-hud-pause" class="btn btn-secondary btn-round" title="Pause (P)">⏸️</button>
+          <div class="minimap-container">
+            <canvas id="minimap-canvas" width="140" height="140"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="hud-bottom-bar">
+        <!-- Virtual Joystick (Mouse drag or touch support) -->
+        <div id="virtual-joystick">
+          <div id="joystick-stick"></div>
+        </div>
+        <div class="controls-hint">
+          ⌨️ <strong>W A S D</strong> to move | <strong>M</strong> Map | <strong>C</strong> Camera
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 09: Fullscreen Blueprint Map Overlay -->
+    <div id="map-overlay" class="screen modal-overlay">
+      <div class="card-dialog map-card">
+        <div class="card-header">
+          <h2>Garden Blueprint</h2>
+          <p class="subtitle">Live maze layout, collectibles, gates & exit arch</p>
+        </div>
+        <canvas id="fullmap-canvas" width="440" height="440"></canvas>
+        <div class="buttons-row">
+          <button id="btn-close-map" class="btn">Close Map (M)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 10: Pause Menu -->
+    <div id="screen-pause" class="screen modal-overlay">
+      <div class="card-dialog" style="max-width: 420px;">
+        <div class="card-header">
+          <h2>Game Paused</h2>
+          <p class="subtitle">Take a cozy breath 🍵</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:24px;">
+          <button id="btn-pause-resume" class="btn">Resume Adventure</button>
+          <button id="btn-pause-restart" class="btn btn-secondary">Restart Level</button>
+          <button id="btn-pause-menu" class="btn btn-secondary">Quit to Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 11: Victory Screen -->
+    <div id="screen-victory" class="screen modal-overlay">
+      <div class="card-dialog">
+        <div class="card-header">
+          <h2>🎉 Garden Victory! 🎉</h2>
+          <p class="subtitle" id="vic-level-name">Level Complete!</p>
+        </div>
+        <div class="stars-row" id="vic-stars">⭐ ⭐ ⭐</div>
+        <div class="stats-summary">
+          <span id="vic-time">Time: 42s</span>
+          <span id="vic-momos">Momos: 6/6</span>
+        </div>
+        <p style="color:var(--accent-green); font-size:16px; font-weight:600; margin-bottom:20px;">
+          Golumolu happily enjoyed all the delicious dumplings!
+        </p>
+        <div class="buttons-row">
+          <button id="btn-vic-next" class="btn btn-green">Next Level ➔</button>
+          <button id="btn-vic-replay" class="btn btn-secondary">Replay ↺</button>
+          <button id="btn-vic-menu" class="btn btn-secondary">Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 12: Defeat Screen -->
+    <div id="screen-defeat" class="screen modal-overlay">
+      <div class="card-dialog" style="max-width: 460px;">
+        <div class="card-header">
+          <h2>👻 Oh no! 👻</h2>
+          <p class="subtitle">A playful garden spirit tagged Golumolu!</p>
+        </div>
+        <p style="font-size:16px; color:var(--text-muted); margin:12px 0 24px 0;">
+          Don't worry, the spirits just wanted to play tag. Ready to try again?
+        </p>
+        <div class="buttons-row">
+          <button id="btn-def-retry" class="btn">Try Again ↺</button>
+          <button id="btn-def-menu" class="btn btn-secondary">Back to Menu</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Game Scripts (ES Modules) -->
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>

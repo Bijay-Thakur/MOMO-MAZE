@@ -1,0 +1,10 @@
+Map: /Game/MomoMaze/Maps/M_Maze_31x31, Total Actors: 1018
+CameraActor: CameraActor_0, auto_activate=<AutoReceiveInput.DISABLED: 0>
+DirectionalLights (1):
+  DirectionalLight_0: intensity=5.5, rot=<Struct 'Rotator' (0x000002BC5D748F10) {pitch: 40.000000, yaw: 0.000000, roll: -50.000000}>
+SkyLights (1):
+  SkyLight_0: intensity=1.2000000476837158
+  Boosted intensity to 2.0 on SkyLight_0
+PlayerStarts (1):
+  PlayerStart_0: loc=<Struct 'Vector' (0x000002BC45080380) {x: 0.000000, y: 360.000000, z: 80.000000}>
+Saved level: True

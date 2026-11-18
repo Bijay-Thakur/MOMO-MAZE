@@ -1,0 +1,9 @@
+Spawned actor: <Object '/Game/MomoMaze/Maps/M_Maze_31x31.M_Maze_31x31:PersistentLevel.BP_GolumoluCharacter_C_0' (0x000001ECD3952800) Class 'BP_GolumoluCharacter_C'>
+Spawned actor components (10):
+  CollisionCylinder (CapsuleComponent)
+  Arrow (ArrowComponent)
+  CharMoveComp (CharacterMovementComponent)
+  CharacterMesh0 (SkeletalMeshComponent)
+  StaticMesh (StaticMeshComponent)
+    StaticMesh: mesh=<Object '/Game/Meshes/Characters/SK_Golumolu.SK_Golumolu' (0x000001EC897E2000) Class 'StaticMesh'>, mat=<Object '/Game/Materials/Characters/M_Golumolu_Fur.M_Golumolu_Fur' (0x000001ECA4F24600) Class 'Material'>
+  SpringArm (SpringArmComponent)

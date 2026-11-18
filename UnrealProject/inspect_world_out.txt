@@ -1,0 +1,15 @@
+World: <Object '/Game/Maps/LVL_MomoMaze_Game.LVL_MomoMaze_Game' (0x000001FBC84BE000) Class 'World'>
+GameMode BP: <Object '/Game/Blueprints/Core/BP_MomoGameMode.BP_MomoGameMode' (0x000001FBA3D59000) Class 'Blueprint'>
+  default_pawn_class: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.BP_GolumoluCharacter_C' (0x000001FABCEB8500) Class 'BlueprintGeneratedClass'>
+  player_controller_class: <Object '/Game/Blueprints/Core/BP_MomoPlayerController.BP_MomoPlayerController_C' (0x000001FBB002B600) Class 'BlueprintGeneratedClass'>
+  spectator_class: <Object '/Script/Engine.SpectatorPawn' (0x00007FF447C0FB68) Class 'Class'>
+Total Actors: 613
+DirectionalLight: DirectionalLight_0, loc: <Struct 'Vector' (0x000001FBB66A6720) {x: 0.000000, y: -3000.000000, z: 800.000000}>, rot: <Struct 'Rotator' (0x000001FBB66A6720) {pitch: 45.000000, yaw: -0.000000, roll: -48.000000}>, intensity: 6.5, mobility: <ComponentMobility.MOVABLE: 2>
+SkyLight: SkyLight_0, intensity: 2.200000047683716, mobility: <ComponentMobility.MOVABLE: 2>
+PostProcessVolume: PostProcessVolume_0, unbound: True
+Camera: CameraActor_0, loc: <Struct 'Vector' (0x000001FBB66A67C0) {x: 0.000000, y: -3100.000000, z: 40.000000}>, rot: <Struct 'Rotator' (0x000001FBB66A67C0) {pitch: 90.000000, yaw: 0.000000, roll: 0.000000}>, auto_activate: <AutoReceiveInput.PLAYER0: 1>
+PlayerStart: PlayerStart_0, loc: <Struct 'Vector' (0x000001FBB66A6720) {x: -1080.000000, y: 420.000000, z: 80.000000}>
+Actor class counts: {'DirectionalLight': 1, 'SkyLight': 1, 'PostProcessVolume': 1, 'StaticMeshActor': 489, 'TextRenderActor': 119, 'CameraActor': 1, 'PlayerStart': 1}
+Golumolu BP: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.BP_GolumoluCharacter' (0x000001FBA3D5AE00) Class 'Blueprint'>
+  Golumolu CDO: <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C' (0x000001FBB9238200) Class 'BP_GolumoluCharacter_C'>
+  Golumolu CDO components: ['CollisionCylinder', 'Arrow', 'CharMoveComp', 'CharacterMesh0']

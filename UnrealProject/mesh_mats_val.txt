@@ -1,0 +1,9 @@
+golumolu_validated: <Object '/Game/MomoMaze/Meshes/Characters/golumolu_validated.golumolu_validated' (0x0000026179B48000) Class 'StaticMesh'>
+static_materials count: 7
+  slot 0: M_Golumolu_Peach_Accent -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000002609610D200) Class 'Material'>
+  slot 1: M_Golumolu_Cheeks -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000002609610D200) Class 'Material'>
+  slot 2: M_Golumolu_Fluffy_Fur -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000002609610D200) Class 'Material'>
+  slot 3: M_Golumolu_Eyes -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000002609610D200) Class 'Material'>
+  slot 4: M_Golumolu_Mouth -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000002609610D200) Class 'Material'>
+  slot 5: M_Golumolu_Eye_Shine -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000002609610D200) Class 'Material'>
+  slot 6: M_Golumolu_Tongue -> <Object '/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial' (0x000002609610D200) Class 'Material'>

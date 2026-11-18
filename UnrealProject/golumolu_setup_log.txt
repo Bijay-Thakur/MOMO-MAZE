@@ -1,0 +1,18 @@
+=== Configuring BP_GolumoluCharacter ===
+Initial handles count: 9
+Handle: None -> <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C' (0x00000201FBEF7800) Class 'BP_GolumoluCharacter_C'>
+Handle: Camera -> <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.BP_GolumoluCharacter_C:Camera_GEN_VARIABLE' (0x000002024B759000) Class 'CameraComponent'>
+Handle: Camera -> <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.BP_GolumoluCharacter_C:Camera_GEN_VARIABLE' (0x000002024B759000) Class 'CameraComponent'>
+Handle: SpringArm -> <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.BP_GolumoluCharacter_C:SpringArm_GEN_VARIABLE' (0x000002024A9A2000) Class 'SpringArmComponent'>
+Handle: Mesh -> <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C:CharacterMesh0' (0x00000202072A0000) Class 'SkeletalMeshComponent'>
+Handle: StaticMesh -> <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.BP_GolumoluCharacter_C:StaticMesh_GEN_VARIABLE' (0x00000201FBEFB400) Class 'StaticMeshComponent'>
+Handle: CapsuleComponent -> <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C:CollisionCylinder' (0x0000020240450E00) Class 'CapsuleComponent'>
+Handle: ArrowComponent -> <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C:Arrow' (0x0000020240451C00) Class 'ArrowComponent'>
+Handle: CharacterMovement -> <Object '/Game/Blueprints/Core/BP_GolumoluCharacter.Default__BP_GolumoluCharacter_C:CharMoveComp' (0x000002024C797800) Class 'CharacterMovementComponent'>
+Configured SpringArm: length=1100, pitch=-55
+Configured CameraComponent FOV=60
+Added new StaticMeshComponent: fail=
+Configured GolumoluVisual static mesh and material
+Compiled Blueprint via unreal.BlueprintEditorLibrary.compile_blueprint
+Saved asset: True
+Verification CDO components: ['CollisionCylinder', 'Arrow', 'CharMoveComp', 'CharacterMesh0']
