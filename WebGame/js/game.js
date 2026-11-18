@@ -10,7 +10,7 @@ import { audio } from './audio.js';
 export class MomoGame {
   constructor() {
     this.container = document.getElementById('game-container');
-    this.cellSize = 1.0;
+    this.cellSize = 2.0;
     this.currentSkin = 'cream';
     this.currentLevelId = 1;
     this.isGrand31 = false;
@@ -21,15 +21,16 @@ export class MomoGame {
     this.targetMomos = 12;
     this.elapsedTime = 0;
     this.invulnerableTimer = 0;
+    this.ghostDivideStage = 1; // 1 ghost at start -> 2 at 30s -> 3 at 60s
 
     // Moving Gates Phase (A vs B)
     this.activePhase = 'A';
     this.phaseTimer = 8.0;
 
-    // Camera settings
+    // Camera settings (hero 3/4 isometric perspective matching Reference 08-A)
     this.cameraMode = 'iso'; // 'iso' | 'top'
-    this.camDistance = 9;
-    this.camHeight = 11;
+    this.camDistance = 9.5;
+    this.camHeight = 11.5;
 
     // Input state
     this.keys = {};
@@ -57,8 +58,8 @@ export class MomoGame {
 
   initThree() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xF5EBD8); // Cozy warm sky
-    this.scene.fog = new THREE.FogExp2(0xF5EBD8, 0.015);
+    this.scene.background = new THREE.Color(0x8ED6F8); // Bright sunny garden sky
+    this.scene.fog = new THREE.FogExp2(0x8ED6F8, 0.006); // Soft atmospheric distance haze
 
     this.camera = new THREE.PerspectiveCamera(
       45,
@@ -77,7 +78,7 @@ export class MomoGame {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
+    this.renderer.toneMappingExposure = 1.05;
 
     this.container.appendChild(this.renderer.domElement);
 
@@ -110,20 +111,63 @@ export class MomoGame {
   }
 
   bindInput() {
-    window.addEventListener('keydown', (e) => {
+    const handleKeyDown = (e) => {
       this.keys[e.code] = true;
+      this.keys[e.key] = true;
+      if (e.key) this.keys[e.key.toLowerCase()] = true;
       audio.init();
       audio.startBGM();
-    });
+    };
 
-    window.addEventListener('keyup', (e) => {
+    const handleKeyUp = (e) => {
       this.keys[e.code] = false;
+      this.keys[e.key] = false;
+      if (e.key) this.keys[e.key.toLowerCase()] = false;
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('keyup', handleKeyUp);
+
+    // Canvas click & drag to move Golumolu
+    let isPointerDown = false;
+    const handlePointer = (clientX, clientY) => {
+      if (this.ui.currentScreen !== 'game' || !this.player) return;
+      const rect = this.renderer.domElement.getBoundingClientRect();
+      const clickX = clientX - (rect.left + rect.width / 2);
+      const clickY = clientY - (rect.top + rect.height / 2);
+      const dist = Math.hypot(clickX, clickY);
+      if (dist > 25) {
+        this.input.joystickX = Math.max(-1, Math.min(1, clickX / 70));
+        this.input.joystickY = Math.max(-1, Math.min(1, clickY / 70));
+      }
+    };
+
+    this.container.addEventListener('pointerdown', (e) => {
+      isPointerDown = true;
+      audio.init();
+      audio.startBGM();
+      handlePointer(e.clientX, e.clientY);
     });
 
-    // Mouse wheel camera zoom
+    window.addEventListener('pointermove', (e) => {
+      if (isPointerDown) {
+        handlePointer(e.clientX, e.clientY);
+      }
+    });
+
+    window.addEventListener('pointerup', () => {
+      isPointerDown = false;
+      this.input.joystickX = 0;
+      this.input.joystickY = 0;
+    });
+
+    // Mouse wheel camera zoom (smoothly scales distance and height)
     window.addEventListener('wheel', (e) => {
       if (this.ui.currentScreen === 'game') {
-        this.camDistance = Math.max(8, Math.min(26, this.camDistance + e.deltaY * 0.015));
+        this.camDistance = Math.max(7, Math.min(28, this.camDistance + e.deltaY * 0.015));
+        this.camHeight = this.camDistance * 1.2;
       }
     }, { passive: true });
   }
@@ -132,29 +176,25 @@ export class MomoGame {
     // Build a miniature cozy garden preview for the menu using the Blender beauty maze
     this.mazeData = MazeGenerator.generateCampaignLevel(MazeGenerator.getLevelConfig(1));
     this.mazeData.isBeautyMaster = true;
-    this.cellSize = this.mazeData.cellSize || 1.0;
-    this.env.cellSize = this.cellSize;
+    this.cellSize = 1.0;
+    this.env.cellSize = 1.0;
     this.env.buildMaze(this.mazeData);
 
-    const offset = (this.mazeData.size - 1) / 2;
     this.player = new GolumoluCharacter(this.currentSkin);
-    this.player.gridX = this.mazeData.playerStart.x;
-    this.player.gridY = this.mazeData.playerStart.y;
-    this.player.worldX = (this.player.gridX - offset) * this.cellSize;
-    this.player.worldZ = (this.player.gridY - offset) * this.cellSize;
+    this.player.worldX = -4.6;
+    this.player.worldZ = 4.8;
     this.player.group.position.set(this.player.worldX, 0, this.player.worldZ);
     this.scene.add(this.player.group);
 
     this.ghosts = [
-      new GhostCharacter('follower', 2, 3, this.cellSize),
-      new GhostCharacter('cutter', 9, 3, this.cellSize)
+      new GhostCharacter('follower', 2, 3, 1.0)
     ];
     this.ghosts.forEach(g => {
-      g.group.position.set((g.gridX - offset) * this.cellSize, 0, (g.gridY - offset) * this.cellSize);
+      g.group.position.set(2.2, 0, -2.5);
       this.scene.add(g.group);
     });
 
-    this.camera.position.set(0, 10, 12);
+    this.camera.position.set(0, 11, 14);
     this.camera.lookAt(0, 0.5, 0);
   }
 
@@ -179,11 +219,16 @@ export class MomoGame {
     this.currentLevelName = levelName;
     this.lives = 3;
     this.collectedMomos = 0;
-    this.cellSize = this.mazeData.cellSize || (this.mazeData.size <= 15 ? 1.0 : 1.2);
+    this.collectedGoldenMomo = false;
+    this.exitGateOpen = false;
+    this.cellSize = this.mazeData.cellSize || (this.mazeData.size <= 15 ? 2.0 : 1.2);
     this.env.cellSize = this.cellSize;
-    this.targetMomos = this.mazeData.collectibles ? this.mazeData.collectibles.length : targetMomos;
+    this.targetMomos = this.mazeData.isBeautyMaster 
+      ? ((this.mazeData.collectiblesWorld ? this.mazeData.collectiblesWorld.length : 10) + 1)
+      : (this.mazeData.collectibles ? this.mazeData.collectibles.length : targetMomos);
     this.elapsedTime = 0;
     this.invulnerableTimer = 0;
+    this.ghostDivideStage = 1; // Initially only 1 ghost active!
     this.activePhase = 'A';
     this.phaseTimer = 8.0;
     this.hasMovingGates = hasMovingGates;
@@ -202,27 +247,88 @@ export class MomoGame {
     // Spawn player at start position inside corridor
     const offset = (this.mazeData.size - 1) / 2;
     this.player = new GolumoluCharacter(this.currentSkin);
-    this.player.gridX = this.mazeData.playerStart.x;
-    this.player.gridY = this.mazeData.playerStart.y;
-    this.player.worldX = (this.player.gridX - offset) * this.cellSize;
-    this.player.worldZ = (this.player.gridY - offset) * this.cellSize;
+    if (this.mazeData.isBeautyMaster && this.mazeData.playerStartWorld) {
+      this.player.worldX = this.mazeData.playerStartWorld.x;
+      this.player.worldZ = this.mazeData.playerStartWorld.z;
+    } else {
+      this.player.gridX = this.mazeData.playerStart.x;
+      this.player.gridY = this.mazeData.playerStart.y;
+      this.player.worldX = (this.player.gridX - offset) * this.cellSize;
+      this.player.worldZ = (this.player.gridY - offset) * this.cellSize;
+    }
     this.player.group.position.set(this.player.worldX, 0, this.player.worldZ);
     this.scene.add(this.player.group);
 
-    // Spawn Ghost Spirits (using level config or defaults)
-    const ghostConfigs = this.mazeData.ghosts || (this.isGrand31
-      ? [{ type: 'follower', x: 11, y: 15 }, { type: 'cutter', x: 19, y: 15 }, { type: 'wanderer', x: 15, y: 25 }]
-      : [{ type: 'follower', x: this.mazeData.size - 3, y: this.mazeData.size - 3 }]);
+    // Initial Ghost: Spawn strictly 1 Ghost (Follower) at start
+    const initialGhost = new GhostCharacter('follower', 2, 3, this.cellSize);
+    if (this.mazeData.isBeautyMaster && this.mazeData.ghostsWorld) {
+      initialGhost.group.position.set(this.mazeData.ghostsWorld[0].x, 0, this.mazeData.ghostsWorld[0].z);
+    } else {
+      const initialGX = (this.mazeData.ghosts && this.mazeData.ghosts[0]) ? this.mazeData.ghosts[0].x : 2;
+      const initialGY = (this.mazeData.ghosts && this.mazeData.ghosts[0]) ? this.mazeData.ghosts[0].y : 3;
+      initialGhost.group.position.set((initialGX - offset) * this.cellSize, 0, (initialGY - offset) * this.cellSize);
+    }
+    this.scene.add(initialGhost.group);
+    this.ghosts.push(initialGhost);
 
-    ghostConfigs.forEach(cfg => {
-      const ghost = new GhostCharacter(cfg.type, cfg.x, cfg.y, this.cellSize);
-      ghost.group.position.set((cfg.x - offset) * this.cellSize, 0, (cfg.y - offset) * this.cellSize);
-      this.scene.add(ghost.group);
-      this.ghosts.push(ghost);
-    });
+    // Snap camera directly over Golumolu at level start so follow begins centered
+    this.camera.position.set(
+      this.player.worldX,
+      this.player.group.position.y + this.camHeight,
+      this.player.worldZ + this.camDistance
+    );
+    this.camera.lookAt(this.player.worldX, 0.7, this.player.worldZ);
 
     this.ui.showScreen('game');
     this.ui.updateHUD(this.getState());
+  }
+
+  // Timed Ghost Division: spawns new spirit with magical poof and sound
+  spawnDividedGhost(type, defaultX, defaultY) {
+    const offset = (this.mazeData.size - 1) / 2;
+    let wx, wz;
+
+    if (this.mazeData.isBeautyMaster) {
+      if (type === 'cutter') {
+        wx = -2.0; wz = -2.5;
+      } else {
+        wx = 0.0; wz = -2.0;
+      }
+    } else {
+      let spawnGX = defaultX;
+      let spawnGY = defaultY;
+      if (this.ghosts.length > 0) {
+        const parent = this.ghosts[0];
+        const pGX = Math.round(parent.gridX);
+        const pGY = Math.round(parent.gridY);
+        const candidates = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, -1]];
+        for (const [ox, oy] of candidates) {
+          const nx = pGX + ox;
+          const ny = pGY + oy;
+          if (this.mazeData.grid[ny]?.[nx] === 0) {
+            spawnGX = nx;
+            spawnGY = ny;
+            break;
+          }
+        }
+      }
+      wx = (spawnGX - offset) * this.cellSize;
+      wz = (spawnGY - offset) * this.cellSize;
+    }
+
+    const ghost = new GhostCharacter(type, 2, 3, this.cellSize);
+    ghost.group.position.set(wx, 0, wz);
+    this.scene.add(ghost.group);
+    this.ghosts.push(ghost);
+
+    // Magical division burst
+    this.env.spawnMomoBlast(wx, 0.6, wz, true);
+    audio.playGateToggle();
+
+    if (this.ui) {
+      const spiritName = type.charAt(0).toUpperCase() + type.slice(1);
+      this.ui.showToast(`👻 Spirit Divided! ${spiritName} joined (${this.ghosts.length} Ghosts active!)`);
+    }
   }
 
   restartLevel() {
@@ -240,6 +346,38 @@ export class MomoGame {
   quitToMenu() {
     this.ui.showScreen('menu');
     this.setupMenuDiorama();
+  }
+
+  startCustom(config) {
+    this.isGrand31 = false;
+    // Map size to nearest campaign level or use grand maze
+    if (config.size >= 31) {
+      this.isGrand31 = true;
+      this.mazeData = MazeGenerator.getMaster31x31Maze();
+    } else {
+      // Find a campaign level with matching grid size, or generate one
+      const matchingLevel = MazeGenerator.getLevelConfig(1);
+      this.mazeData = MazeGenerator.generateCampaignLevel(matchingLevel);
+      if (config.size !== 12) {
+        // Generate fresh maze at the requested size
+        const fakeConfig = {
+          level_id: 99, name: 'Custom', grid_size: config.size,
+          target_momos: Math.floor(config.size * 0.8),
+          has_moving_gates: config.gates,
+          starting_spirits: config.ghosts
+        };
+        this.mazeData = MazeGenerator.generateCampaignLevel(fakeConfig);
+      }
+    }
+    // Apply custom ghost speed modifier
+    this._customSpeedMod = config.speed || 1.0;
+    this._customInitialGhosts = Math.max(1, Math.min(4, config.ghosts || 1));
+    this.initPlaySession('Custom Play', this.mazeData.collectibles?.length || 8, config.gates);
+    // Spawn extra initial ghosts if requested
+    const types = ['follower','cutter','wanderer','wanderer'];
+    for (let i = 1; i < this._customInitialGhosts; i++) {
+      this.spawnDividedGhost(types[i] || 'wanderer', i * 3, i * 2);
+    }
   }
 
   setSkin(skinKey) {
@@ -266,31 +404,59 @@ export class MomoGame {
       activePhase: this.activePhase,
       phaseTimer: this.phaseTimer,
       hasMovingGates: this.hasMovingGates,
+      exitGateOpen: this.exitGateOpen,
+      collectedGoldenMomo: this.collectedGoldenMomo,
       mazeData: this.mazeData,
       player: this.player,
       ghosts: this.ghosts
     };
   }
 
+  triggerDash() {
+    if (this.dashCooldownTimer > 0) return;
+    this.dashTimer = 1.0;
+    this.dashCooldownTimer = 2.5;
+    audio.playPowerup();
+    if (this.player && this.env) {
+      this.env.spawnMomoBlast(this.player.worldX, 0.4, this.player.worldZ, false);
+    }
+  }
+
   handlePlayerInput(delta) {
     let dx = 0;
     let dz = 0;
 
-    if (this.keys['KeyW'] || this.keys['ArrowUp']) dz -= 1;
-    if (this.keys['KeyS'] || this.keys['ArrowDown']) dz += 1;
-    if (this.keys['KeyA'] || this.keys['ArrowLeft']) dx -= 1;
-    if (this.keys['KeyD'] || this.keys['ArrowRight']) dx += 1;
+    const isUp = this.keys['KeyW'] || this.keys['w'] || this.keys['W'] || this.keys['ArrowUp'];
+    const isDown = this.keys['KeyS'] || this.keys['s'] || this.keys['S'] || this.keys['ArrowDown'];
+    const isLeft = this.keys['KeyA'] || this.keys['a'] || this.keys['A'] || this.keys['ArrowLeft'];
+    const isRight = this.keys['KeyD'] || this.keys['d'] || this.keys['D'] || this.keys['ArrowRight'];
 
-    // Add virtual joystick input
-    if (Math.hypot(this.input.joystickX, this.input.joystickY) > 0.1) {
+    if (isUp) dz -= 1;
+    if (isDown) dz += 1;
+    if (isLeft) dx -= 1;
+    if (isRight) dx += 1;
+
+    // Dash input (Space key)
+    if (this.keys['Space'] || this.keys[' ']) {
+      this.triggerDash();
+    }
+
+    if (this.dashCooldownTimer > 0) this.dashCooldownTimer -= delta;
+    let speed = 5.2;
+    if (this.dashTimer > 0) {
+      this.dashTimer -= delta;
+      speed = 8.5; // Dash boost!
+    }
+
+    // Add virtual joystick or canvas pointer drag input
+    if (Math.hypot(this.input.joystickX, this.input.joystickY) > 0.12) {
       dx += this.input.joystickX;
       dz += this.input.joystickY;
     }
 
     const len = Math.hypot(dx, dz);
-    const speed = 4.2;
 
-    if (len > 0.1) {
+    if (len > 0.05) {
       dx = dx / len;
       dz = dz / len;
 
@@ -304,34 +470,61 @@ export class MomoGame {
       let diff = targetAngle - curAngle;
       while (diff < -Math.PI) diff += Math.PI * 2;
       while (diff > Math.PI) diff -= Math.PI * 2;
-      this.player.modelRoot.rotation.y += diff * Math.min(1.0, delta * 12);
+      this.player.modelRoot.rotation.y += diff * Math.min(1.0, delta * 14);
+
+      const offset = (this.mazeData.size - 1) / 2;
+      const r = 0.32; // Player collision radius
 
       // Desired new world position
       const nextX = this.player.worldX + dx * speed * delta;
       const nextZ = this.player.worldZ + dz * speed * delta;
 
-      // Collision detection against walls & moving gates
-      const offset = (this.mazeData.size - 1) / 2;
-      const r = 0.28; // Player collision radius
+      const isWallBlocked = (wx, wz) => {
+        if (this.mazeData.isBeautyMaster && this.mazeData.wallSegments) {
+          // Bounding box border
+          if (Math.abs(wx) > 5.35 || Math.abs(wz) > 5.35) {
+            // Check if exiting through open North Leaf Gate
+            if (this.exitGateOpen && wz < -5.3 && Math.abs(wx) < 1.25) {
+              return false; // Free passage through open leaf gate!
+            }
+            return true;
+          }
 
-      const isCellPassable = (cx, cy) => {
-        if (cx < 0 || cx >= this.mazeData.size || cy < 0 || cy >= this.mazeData.size) return false;
-        const cell = this.mazeData.grid[cy][cx];
-        if (cell === 1) return false; // Hedge Wall
-        if (cell === 2 && this.activePhase === 'A') return false; // Gate A closed
-        if (cell === 3 && this.activePhase === 'B') return false; // Gate B closed
-        return true;
-      };
+          // Check if North Leaf Gate is closed
+          if (!this.exitGateOpen && wz < -5.3 && Math.abs(wx) < 1.25) {
+            return true;
+          }
 
-      const canMoveTo = (wx, wz) => {
-        // Test corners around player
+          // Test against all 21 verified hedge wall segments
+          for (const w of this.mazeData.wallSegments) {
+            const hx = w.sx / 2.0;
+            const hz = w.sz / 2.0;
+            const cx = Math.max(w.x - hx, Math.min(wx, w.x + hx));
+            const cz = Math.max(w.z - hz, Math.min(wz, w.z + hz));
+            if ((wx - cx) ** 2 + (wz - cz) ** 2 < r * r) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        // Procedural grid fallback
+        const isCellPassable = (cx, cy) => {
+          if (cx < 0 || cx >= this.mazeData.size || cy < 0 || cy >= this.mazeData.size) return false;
+          const cell = this.mazeData.grid[cy][cx];
+          if (cell === 1) return false;
+          if (cell === 2 && this.activePhase === 'A') return false;
+          if (cell === 3 && this.activePhase === 'B') return false;
+          return true;
+        };
+
         const corners = [
           [wx - r, wz - r],
           [wx + r, wz - r],
           [wx - r, wz + r],
           [wx + r, wz + r]
         ];
-        return corners.every(([cx, cz]) => {
+        return !corners.every(([cx, cz]) => {
           const gx = Math.round(cx / this.cellSize + offset);
           const gy = Math.round(cz / this.cellSize + offset);
           return isCellPassable(gx, gy);
@@ -339,10 +532,10 @@ export class MomoGame {
       };
 
       // Slide along walls (test X and Z independently)
-      if (canMoveTo(nextX, this.player.worldZ)) {
+      if (!isWallBlocked(nextX, this.player.worldZ)) {
         this.player.worldX = nextX;
       }
-      if (canMoveTo(this.player.worldX, nextZ)) {
+      if (!isWallBlocked(this.player.worldX, nextZ)) {
         this.player.worldZ = nextZ;
       }
 
@@ -364,35 +557,37 @@ export class MomoGame {
 
   checkMomoCollection() {
     const pPos = this.player.group.position;
-    for (const m of this.env.momos) {
-      if (!m.collected) {
-        const dist = Math.hypot(pPos.x - m.mesh.position.x, pPos.z - m.mesh.position.z);
-        if (dist < 0.75) {
-          if (this.env.collectMomo(m.gridX, m.gridY)) {
-            this.collectedMomos++;
-            this.player.triggerEat();
-            audio.playCollectMomo();
 
-            // Check if all collected
-            if (this.collectedMomos >= this.targetMomos) {
-              audio.playCollectGolden();
-            }
-            break;
-          }
-        }
+    // 1. Regular steamed momo dumplings
+    if (this.env.collectMomoAt(pPos.x, pPos.z, 1.05)) {
+      this.collectedMomos++;
+      this.player.triggerEat();
+      audio.playCollectMomo();
+      if (this.ui) this.ui.updateHUD(this.getState());
+    }
+
+    // 2. The Legendary Golden Momo Sanctuary
+    if (!this.collectedGoldenMomo && this.env.collectGoldenMomoAt(pPos.x, pPos.z, 1.25)) {
+      this.collectedGoldenMomo = true;
+      this.collectedMomos++;
+      this.exitGateOpen = true;
+      this.player.triggerEat();
+      audio.playCollectGolden();
+      if (this.ui) {
+        this.ui.updateHUD(this.getState());
+        this.ui.showToast('👑 GOLDEN MOMO CONSUMED! North Leaf Gate is Open!');
       }
     }
   }
 
   checkExitGate() {
-    if (this.collectedMomos < this.targetMomos) return;
+    if (!this.exitGateOpen && this.collectedMomos < this.targetMomos && !this.collectedGoldenMomo) return;
     const pPos = this.player.group.position;
-    const offset = (this.mazeData.size - 1) / 2;
-    const exitWX = (this.mazeData.exitGate.x - offset) * this.cellSize;
-    const exitWZ = (this.mazeData.exitGate.y - offset) * this.cellSize;
+    const exitWX = (this.mazeData.isBeautyMaster && this.mazeData.exitGateWorld) ? this.mazeData.exitGateWorld.x : 0.0;
+    const exitWZ = (this.mazeData.isBeautyMaster && this.mazeData.exitGateWorld) ? this.mazeData.exitGateWorld.z : -5.75;
     const dist = Math.hypot(pPos.x - exitWX, pPos.z - exitWZ);
 
-    if (dist < 1.3) {
+    if (dist < 2.0) {
       // Victory!
       this.ui.showVictory({
         levelName: this.currentLevelName,
@@ -415,11 +610,17 @@ export class MomoGame {
     const pPos = this.player.group.position;
     for (const g of this.ghosts) {
       const dist = Math.hypot(pPos.x - g.group.position.x, pPos.z - g.group.position.z);
-      if (dist < 0.65) {
+      if (dist < 0.95) {
         // Hit by ghost!
         this.lives--;
         this.invulnerableTimer = 2.0;
         audio.playHit();
+
+        if (this.ui) {
+          this.ui.showToast('💥 Spirit Tagged Golumolu! 1 Life Lost 💔');
+          this.ui.setInvulnFlash(true);
+          setTimeout(() => this.ui.setInvulnFlash(false), 400);
+        }
 
         if (this.lives <= 0) {
           this.ui.showDefeat();
@@ -434,31 +635,34 @@ export class MomoGame {
       const pPos = this.player.group.position;
 
       if (this.cameraMode === 'iso') {
+        // Active, responsive follow: camera tracks Golumolu directly while framing surrounding maze corridors
         const targetCamX = pPos.x;
         const targetCamY = pPos.y + this.camHeight;
         const targetCamZ = pPos.z + this.camDistance;
 
-        this.camera.position.x += (targetCamX - this.camera.position.x) * Math.min(1.0, delta * 6);
-        this.camera.position.y += (targetCamY - this.camera.position.y) * Math.min(1.0, delta * 6);
-        this.camera.position.z += (targetCamZ - this.camera.position.z) * Math.min(1.0, delta * 6);
-        this.camera.lookAt(pPos.x, pPos.y + 0.6, pPos.z);
+        const lerpFactor = Math.min(1.0, delta * 7.0);
+        this.camera.position.x += (targetCamX - this.camera.position.x) * lerpFactor;
+        this.camera.position.y += (targetCamY - this.camera.position.y) * lerpFactor;
+        this.camera.position.z += (targetCamZ - this.camera.position.z) * lerpFactor;
+        this.camera.lookAt(pPos.x, pPos.y + 0.7, pPos.z);
       } else {
-        // Top-down camera
+        // Top-down tactical overview
         const targetCamX = pPos.x;
         const targetCamY = pPos.y + this.camHeight * 1.5;
         const targetCamZ = pPos.z + 0.01;
 
-        this.camera.position.x += (targetCamX - this.camera.position.x) * Math.min(1.0, delta * 6);
-        this.camera.position.y += (targetCamY - this.camera.position.y) * Math.min(1.0, delta * 6);
-        this.camera.position.z += (targetCamZ - this.camera.position.z) * Math.min(1.0, delta * 6);
+        const lerpFactor = Math.min(1.0, delta * 8.0);
+        this.camera.position.x += (targetCamX - this.camera.position.x) * lerpFactor;
+        this.camera.position.y += (targetCamY - this.camera.position.y) * lerpFactor;
+        this.camera.position.z += (targetCamZ - this.camera.position.z) * lerpFactor;
         this.camera.lookAt(pPos.x, pPos.y, pPos.z);
       }
     } else {
       // Menu rotating diorama camera
       const time = performance.now() * 0.0003;
-      this.camera.position.x = Math.sin(time) * 14;
-      this.camera.position.z = Math.cos(time) * 14;
-      this.camera.position.y = 9 + Math.sin(time * 2) * 1.5;
+      this.camera.position.x = Math.sin(time) * 18;
+      this.camera.position.z = Math.cos(time) * 18;
+      this.camera.position.y = 12 + Math.sin(time * 2) * 1.5;
       this.camera.lookAt(0, 1, 0);
     }
   }
@@ -473,6 +677,20 @@ export class MomoGame {
     if (!this.ui.isPaused) {
       if (this.ui.currentScreen === 'game') {
         this.elapsedTime += delta;
+
+        // Timed Ghost Division (User Specification):
+        // Start: 1 Follower ghost
+        // 30s  → splits: adds Cutter (2 ghosts total)
+        // 60s  → splits: adds Wanderer (3 ghosts total)
+        // Max 4 ghosts
+        if (this.elapsedTime >= 30.0 && this.ghostDivideStage === 1) {
+          this.ghostDivideStage = 2;
+          this.spawnDividedGhost('cutter', 9, 3);
+        }
+        if (this.elapsedTime >= 60.0 && this.ghostDivideStage === 2) {
+          this.ghostDivideStage = 3;
+          this.spawnDividedGhost('wanderer', 2, 9);
+        }
 
         // Gate phase timer
         if (this.hasMovingGates) {
@@ -491,7 +709,7 @@ export class MomoGame {
 
         // Update ghosts AI
         this.ghosts.forEach(g => {
-          g.update(delta, this.player, this.mazeData.grid, this.mazeData.size, this.activePhase);
+          g.update(delta, this.player, this.mazeData.grid, this.mazeData.size, this.activePhase, this.mazeData);
         });
 
         this.ui.updateHUD(this.getState());

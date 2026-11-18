@@ -9,13 +9,13 @@ const gltfLoader = new GLTFLoader();
 
 export const SKINS = {
   cream: {
-    name: 'Classic Cream (Original)',
-    body: 0xFCEEDD,     // Warm fluffy cream fur
-    belly: 0xFFFBF2,    // Soft white-cream belly
-    accent: 0xFFC189,   // Soft peach ears, paws, feet, tail
-    blush: 0xFFB3B0,    // Rosy pink blush cheeks
-    eyes: 0x6B4226,     // Dark glossy brown eyes
-    mouth: 0xE27567     // Soft peach-red mouth
+    name: 'Classic Honey Peach (Original)',
+    body: 0xFFA647,     // Warm golden honey apricot fur (distinct from white ghosts!)
+    belly: 0xFFE6C4,    // Warm custard belly
+    accent: 0xFF7A38,   // Rich peach ears, paws, feet, tail
+    blush: 0xFF4265,    // Rosy pink blush cheeks
+    eyes: 0x3D2214,     // Dark glossy chocolate eyes
+    mouth: 0xE25547     // Soft happy mouth
   },
   golden_momo: {
     name: 'Golden Momo',
@@ -56,7 +56,7 @@ export class GolumoluCharacter {
     this.isMoving = false;
     this.eatAnim = 0;
 
-    // Scale to fit corridor width (1.0m) comfortably while remaining cute & prominent
+    // Natural scale matching 1.0m maze corridors
     this.group.scale.set(1.0, 1.0, 1.0);
 
     this.buildMesh();
@@ -72,10 +72,23 @@ export class GolumoluCharacter {
           if (c.isMesh) {
             c.castShadow = true;
             c.receiveShadow = true;
+            if (c.material) {
+              const mn = (c.material.name || '').toLowerCase();
+              if (mn.includes('fur') || mn.includes('body')) {
+                c.material.color.setHex(0xFFA647);
+                c.material.roughness = 0.82;
+              } else if (mn.includes('peach') || mn.includes('accent')) {
+                c.material.color.setHex(0xFF7A38);
+              } else if (mn.includes('belly')) {
+                c.material.color.setHex(0xFFE6C4);
+              } else if (mn.includes('blush')) {
+                c.material.color.setHex(0xFF4265);
+              }
+            }
           }
         });
 
-        // 1:1 scale matching corridor width 1.0m
+        // Natural 1.0 scale matching garden corridors
         glb.scale.set(1.0, 1.0, 1.0);
         glb.position.set(0, 0, 0);
 
@@ -149,20 +162,20 @@ export class GolumoluCharacter {
     this.proceduralRoot = new THREE.Group();
     this.modelRoot.add(this.proceduralRoot);
 
-    // 1. Chubby Main Body (radius 0.44, squished Y: 0.94)
-    const bodyGeo = new THREE.SphereGeometry(0.44, 28, 24);
-    bodyGeo.scale(1.02, 0.94, 0.92);
+    // 1. Chubby Main Body (radius 0.54)
+    const bodyGeo = new THREE.SphereGeometry(0.54, 28, 24);
+    bodyGeo.scale(1.04, 0.96, 0.94);
     this.bodyMesh = new THREE.Mesh(bodyGeo, this.matBody);
-    this.bodyMesh.position.y = 0.44;
+    this.bodyMesh.position.y = 0.55;
     this.bodyMesh.castShadow = true;
     this.bodyMesh.receiveShadow = true;
     this.proceduralRoot.add(this.bodyMesh);
 
     // 2. Soft Cream Belly Patch
-    const bellyGeo = new THREE.SphereGeometry(0.38, 20, 16);
-    bellyGeo.scale(0.85, 0.85, 0.35);
+    const bellyGeo = new THREE.SphereGeometry(0.42, 20, 16);
+    bellyGeo.scale(0.92, 0.90, 0.40);
     const belly = new THREE.Mesh(bellyGeo, this.matBelly);
-    belly.position.set(0, 0.38, 0.28);
+    belly.position.set(0, 0.45, 0.36);
     this.proceduralRoot.add(belly);
 
     // 3. Peach Ears (Small rounded nubs with slight forward tilt)
@@ -278,6 +291,9 @@ export class GolumoluCharacter {
       const hop = Math.sin(this.eatAnim * Math.PI) * 0.22;
       this.bodyMesh.scale.set(1.02 + hop * 0.25, 0.94 + hop * 0.40, 0.92 - hop * 0.15);
       this.mouth.scale.set(1.0 + hop * 1.5, 1.0 + hop * 1.5, 1.0);
+      if (this.glbMesh) {
+        this.glbMesh.scale.set(1.0 + hop * 0.35, 1.0 + hop * 0.45, 1.0 - hop * 0.15);
+      }
     }
 
     if (this.isMoving) {

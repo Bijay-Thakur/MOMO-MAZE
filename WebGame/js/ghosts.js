@@ -2,14 +2,14 @@
 // Follower, Cutter, Wanderer with Hero Scaling & Elongated Flying Tails
 import * as THREE from './three.module.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { MazeGenerator } from './maze_generator.js';
+import { MazeGenerator, BEAUTY_WAYPOINTS } from './maze_generator.js';
 
 export const GHOST_TYPES = {
   follower: {
     name: 'Follower',
     color: 0xFFF5E6,
     glow: 0xFFE082,
-    speed: 2.1,
+    speed: 2.8,
     eyeType: 'round',
     desc: 'Curious and loyal. Tracks Golumolu directly through the maze.'
   },
@@ -17,7 +17,7 @@ export const GHOST_TYPES = {
     name: 'Cutter',
     color: 0xFFEDE0,
     glow: 0xFFAB91,
-    speed: 2.4,
+    speed: 3.3,
     eyeType: 'angled',
     desc: 'Clever and quick. Anticipates turns and tries to cut Golumolu off!'
   },
@@ -25,7 +25,7 @@ export const GHOST_TYPES = {
     name: 'Wanderer',
     color: 0xF3E5F5,
     glow: 0xCE93D8,
-    speed: 1.8,
+    speed: 2.4,
     eyeType: 'star',
     desc: 'Dreamy and energetic. Swirls through garden corridors.'
   }
@@ -46,7 +46,7 @@ export class GhostCharacter {
     this.currentPath = [];
     this.pathTimer = 0;
 
-    // Scale to fit corridor width (1.0m) comfortably while remaining distinct & prominent
+    // Ghost scale: 1.0 — fits corridor comfortably, doesn't overwhelm the maze
     this.group.scale.set(1.0, 1.0, 1.0);
 
     this.buildMesh();
@@ -59,7 +59,7 @@ export class GhostCharacter {
       modelPath,
       (gltf) => {
         const glbScene = gltf.scene;
-        // 1:1 scale matching corridor width 1.0m
+        // Ghost GLB scale: 1.0 — matches maze corridors
         glbScene.scale.set(1.0, 1.0, 1.0);
         glbScene.position.set(0, 0, 0);
 
@@ -122,23 +122,24 @@ export class GhostCharacter {
     this.headMesh.castShadow = true;
     this.proceduralRoot.add(this.headMesh);
 
-    // 2. Flowing Wisp Ribbon Tail (soft curved mantle billowing upwards & back, NO spikes, NO cones!)
+    // 2. Wavy Flowing Ribbon Wisp Tail (S-curve undulation curving upwards & back!)
     const curvePoints = [
-      new THREE.Vector3(0, 0.42, 0.05),
-      new THREE.Vector3(0, 0.45, -0.22),
-      new THREE.Vector3(0, 0.52, -0.50),
-      new THREE.Vector3(0, 0.62, -0.76)
+      new THREE.Vector3(0, 0.44, 0.05),
+      new THREE.Vector3(0.14, 0.48, -0.25),  // wave crest right
+      new THREE.Vector3(-0.12, 0.44, -0.55), // wave trough left
+      new THREE.Vector3(0.15, 0.58, -0.85),  // wave crest right
+      new THREE.Vector3(0, 0.72, -1.15)      // rounded puff tip up
     ];
     const curve = new THREE.CatmullRomCurve3(curvePoints);
-    const tailGeo = new THREE.TubeGeometry(curve, 24, 0.16, 12, false);
+    const tailGeo = new THREE.TubeGeometry(curve, 28, 0.18, 14, false);
     this.mainTail = new THREE.Mesh(tailGeo, matGhost);
     this.mainTail.castShadow = true;
     this.proceduralRoot.add(this.mainTail);
 
     // Rounded cloud puff at tail end
-    const puffGeo = new THREE.SphereGeometry(0.14, 14, 10);
+    const puffGeo = new THREE.SphereGeometry(0.18, 14, 10);
     const puff = new THREE.Mesh(puffGeo, matGhost);
-    puff.position.set(0, 0.62, -0.76);
+    puff.position.set(0, 0.72, -1.15);
     this.proceduralRoot.add(puff);
 
     this.tailSegments = [];
@@ -233,10 +234,11 @@ export class GhostCharacter {
     this.group.add(this.light);
   }
 
-  update(delta, player, grid, gridSize, activePhase) {
+  update(delta, player, grid, gridSize, activePhase, mazeData = null) {
     this.floatCycle += delta * 3.8;
     const hover = Math.sin(this.floatCycle) * 0.16;
-    this.modelRoot.position.y = hover;
+    // Hover mid-air at eye level above garden pathways
+    this.modelRoot.position.y = 0.95 + hover;
 
     // Swimming wave animation for elongated tail
     this.tailSegments.forEach((seg, i) => {
@@ -258,6 +260,47 @@ export class GhostCharacter {
       this.glbMesh.rotation.x = Math.cos(this.floatCycle * 0.8) * 0.06;
     }
 
+    // If in Beauty Master Maze: use verified open corridor waypoints!
+    if (mazeData && mazeData.isBeautyMaster) {
+      if (!this.targetWaypoint || Math.hypot(this.group.position.x - this.targetWaypoint.x, this.group.position.z - this.targetWaypoint.z) < 0.45) {
+        const wps = BEAUTY_WAYPOINTS;
+        if (this.typeKey === 'follower') {
+          // Pursue closest waypoint to Golumolu
+          let best = wps[0];
+          let bestDist = 999;
+          for (const wp of wps) {
+            const d = Math.hypot(player.group.position.x - wp.x, player.group.position.z - wp.z);
+            if (d < bestDist && wp !== this.targetWaypoint) {
+              bestDist = d;
+              best = wp;
+            }
+          }
+          this.targetWaypoint = best;
+        } else {
+          // Patrol open waypoints
+          const choices = wps.filter(w => w !== this.targetWaypoint);
+          this.targetWaypoint = choices[Math.floor(Math.random() * choices.length)];
+        }
+      }
+
+      const dx = this.targetWaypoint.x - this.group.position.x;
+      const dz = this.targetWaypoint.z - this.group.position.z;
+      const dist = Math.hypot(dx, dz);
+      if (dist > 0.05) {
+        const moveDist = Math.min(dist, this.spec.speed * delta);
+        this.group.position.x += (dx / dist) * moveDist;
+        this.group.position.z += (dz / dist) * moveDist;
+
+        const targetAngle = Math.atan2(dx, dz);
+        let curAngle = this.modelRoot.rotation.y;
+        let diff = targetAngle - curAngle;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        this.modelRoot.rotation.y += diff * Math.min(1.0, delta * 9);
+      }
+      return;
+    }
+
     // AI Path recalculation (every 0.4s)
     this.pathTimer -= delta;
     if (this.pathTimer <= 0) {
@@ -275,7 +318,7 @@ export class GhostCharacter {
       const dz = targetWorldZ - this.group.position.z;
       const dist = Math.hypot(dx, dz);
 
-      if (dist < 0.1) {
+      if (dist < 0.22) {
         // Arrived at waypoint
         this.gridX = nextCell.x;
         this.gridY = nextCell.y;

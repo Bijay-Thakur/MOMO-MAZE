@@ -75,23 +75,38 @@ class AudioManager {
     if (this.muted) return;
     this.init();
     const now = this.ctx.currentTime;
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (major arpeggio)
+
+    // 1. Crisp pop/blast transient sound
+    const popOsc = this.ctx.createOscillator();
+    const popGain = this.ctx.createGain();
+    popOsc.type = 'triangle';
+    popOsc.frequency.setValueAtTime(480, now);
+    popOsc.frequency.exponentialRampToValueAtTime(80, now + 0.12);
+    popGain.gain.setValueAtTime(0.35 * this.volume, now);
+    popGain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+    popOsc.connect(popGain);
+    popGain.connect(this.ctx.destination);
+    popOsc.start(now);
+    popOsc.stop(now + 0.15);
+
+    // 2. Celebratory arpeggio sparkle chime
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C5, E5, G5, C6, E6
     notes.forEach((freq, i) => {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      const t = now + i * 0.045;
+      const t = now + i * 0.04;
 
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, t);
 
-      gain.gain.setValueAtTime(0.25 * this.volume, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+      gain.gain.setValueAtTime(0.28 * this.volume, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
 
       osc.start(t);
-      osc.stop(t + 0.3);
+      osc.stop(t + 0.34);
     });
   }
 
@@ -117,6 +132,27 @@ class AudioManager {
       osc.start(t);
       osc.stop(t + 0.5);
     });
+  }
+
+  playPowerup() {
+    if (this.muted) return;
+    this.init();
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(880, now + 0.18);
+
+    gain.gain.setValueAtTime(0.20 * this.volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.24);
   }
 
   playGateToggle() {

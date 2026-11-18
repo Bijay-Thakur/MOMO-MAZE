@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Mobile phone first: viewport, safe areas, no zoom -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#754528">
   <title>MOMO MAZE – A Cozy Garden Adventure</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <script type="importmap">
   {
@@ -15,227 +21,660 @@
   </script>
 </head>
 <body>
-  <!-- 3D Canvas Container -->
+
+  <!-- THREE.JS 3D CANVAS (back layer) -->
   <div id="game-container"></div>
 
-  <!-- UI Screens Layer -->
+  <!-- FX CANVAS (particle effects, overlaid on 3D) -->
+  <canvas id="fx-canvas"></canvas>
+
+  <!-- =====================================================
+       UI LAYER — All screens live here
+       Phone safe: uses env(safe-area-inset-*) in CSS
+       ===================================================== -->
   <div id="ui-layer">
 
-    <!-- Screen 01/02: Main Menu -->
-    <div id="screen-menu" class="screen active">
-      <div class="menu-brand">
-        <h1 class="menu-title">MOMO MAZE</h1>
-        <p class="menu-subtitle">🌸 A Cozy Garden Adventure 🌸</p>
-      </div>
-
-      <div class="menu-center-card">
-        <button id="btn-play-campaign" class="btn">
-          <span>▶</span> Play Campaign (25 Levels)
-        </button>
-        <button id="btn-play-grand-31" class="btn btn-green">
-          <span>🏰</span> Play 31×31 Grand Maze
-        </button>
-        <button id="btn-open-closet" class="btn btn-secondary">
-          <span>🧸</span> Golumolu's Closet
-        </button>
-        <button id="btn-open-spirits" class="btn btn-secondary">
-          <span>📖</span> Spirit Book
-        </button>
-        <button id="btn-open-settings" class="btn btn-secondary">
-          <span>⚙️</span> Settings & Controls
-        </button>
-      </div>
-
-      <div class="menu-bottom-bar">
-        <div class="controls-hint">
-          ⌨️ Controls: <strong>W A S D</strong> or <strong>Arrow Keys</strong> to move | <strong>M</strong> Map | <strong>P</strong> Pause | <strong>C</strong> Camera
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 01 · SPLASH (Approved Screen 01-A)
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-splash" class="screen active" tabindex="0" role="button" aria-label="Press any key to continue">
+      <div class="splash-ambient-fill"></div>
+      <div class="splash-stage">
+        <img class="splash-art-img" src="assets/images/splash_bg_01_A.png" alt="MOMO MAZE: A Cozy Garden Adventure" />
+        
+        <!-- Ambient golden sun motes / floating sparkles -->
+        <div class="splash-particles" aria-hidden="true">
+          <span class="mote m1"></span>
+          <span class="mote m2"></span>
+          <span class="mote m3"></span>
+          <span class="mote m4"></span>
+          <span class="mote m5"></span>
+          <span class="mote m6"></span>
+          <span class="mote m7"></span>
+          <span class="mote m8"></span>
         </div>
+
+        <!-- Pulsing interactive breathing glow accent on prompt -->
+        <div class="splash-prompt-glow" aria-hidden="true"></div>
       </div>
     </div>
 
-    <!-- Screen: Campaign Level Select (25 Levels across Chapters) -->
-    <div id="screen-levels" class="screen modal-overlay">
-      <div class="card-dialog">
-        <div class="card-header">
-          <h2>Garden Campaign</h2>
-          <p class="subtitle">Choose your adventure chapter & level</p>
-        </div>
-        <div class="scrollable-body" id="levels-grid"></div>
-        <div class="buttons-row">
-          <button class="btn btn-secondary btn-back-to-menu">← Back to Menu</button>
-        </div>
-      </div>
-    </div>
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 02 · MAIN MENU (Approved Screen 02-B)
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-menu" class="screen">
+      <div class="menu-ambient-fill"></div>
+      <div class="menu-stage">
+        <img class="menu-art-bg" src="assets/images/menu_bg_clean.png" alt="MOMO MAZE Main Menu" />
 
-    <!-- Screen: Golumolu Closet (Skins & Hats) -->
-    <div id="screen-closet" class="screen modal-overlay">
-      <div class="card-dialog">
-        <div class="card-header">
-          <h2>Golumolu's Closet</h2>
-          <p class="subtitle">Dress up Golumolu in cozy styles!</p>
+        <!-- Ambient golden sun motes -->
+        <div class="menu-particles" aria-hidden="true">
+          <span class="mote m1"></span>
+          <span class="mote m3"></span>
+          <span class="mote m5"></span>
+          <span class="mote m7"></span>
         </div>
-        <div id="closet-skins-list"></div>
-        <div class="buttons-row">
-          <button class="btn btn-back-to-menu">Done</button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Screen: Spirit Book (Lore & Strategy) -->
-    <div id="screen-spirits" class="screen modal-overlay">
-      <div class="card-dialog">
-        <div class="card-header">
-          <h2>Garden Spirit Book</h2>
-          <p class="subtitle">Learn about the friendly garden spirits</p>
-        </div>
-        <div id="spirits-list"></div>
-        <div class="buttons-row">
-          <button class="btn btn-secondary btn-back-to-menu">← Back</button>
-        </div>
-      </div>
-    </div>
+        <!-- 3D Interactive Controls Layer (Real, Distinct, Raised 3D Buttons) -->
+        <div class="menu-interactive-layer">
+          <!-- Standalone 3D Primary Play Button -->
+          <button id="btn-play" class="menu-pill-btn" aria-label="Play MOMO MAZE" type="button">
+            <img src="assets/images/ui_menu/btn_play_exact.png" alt="Play" class="pill-btn-img" />
+          </button>
 
-    <!-- Screen: Settings & Controls -->
-    <div id="screen-settings" class="screen modal-overlay">
-      <div class="card-dialog">
-        <div class="card-header">
-          <h2>Settings</h2>
-          <p class="subtitle">Configure your cozy experience</p>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:18px; margin:16px 0 28px 0; text-align:left;">
-          <label style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:600;">
-            <span>🔊 Sound Effects & Ambient Music</span>
-            <input type="checkbox" id="chk-mute" style="width:20px; height:20px; cursor:pointer;">
-          </label>
-          <label style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:600;">
-            <span>🎥 Camera View</span>
-            <select id="sel-camera-mode" style="padding:8px 14px; border-radius:12px; border:2px solid #FFE0B2; font-size:15px; background:#fff; font-weight:600;">
-              <option value="iso">Cozy 3/4 Isometric</option>
-              <option value="top">Top-Down Bird's Eye</option>
-            </select>
-          </label>
-          <div style="background:#FFF8E1; padding:14px; border-radius:14px; font-size:14px; line-height:1.5;">
-            <strong>⌨️ Keyboard Shortcuts:</strong><br>
-            • <strong>W, A, S, D</strong> or <strong>Arrows</strong>: Move Golumolu<br>
-            • <strong>Mouse Wheel</strong>: Zoom Camera in/out<br>
-            • <strong>C</strong>: Switch Camera Angle<br>
-            • <strong>M</strong>: Fullscreen Blueprint Map<br>
-            • <strong>P / Esc</strong>: Pause Game
+          <!-- Standalone 3D Bottom Navigation Cards Row -->
+          <div class="menu-cards-row">
+            <!-- 1. Levels -->
+            <button id="btn-menu-levels" class="menu-card-btn" aria-label="Garden Level Map" type="button">
+              <img src="assets/images/ui_menu/btn_levels_exact.png" alt="Levels" class="card-btn-img" />
+            </button>
+
+            <!-- 2. Golumolu -->
+            <button id="btn-menu-golumolu" class="menu-card-btn" aria-label="Golumolu Closet" type="button">
+              <img src="assets/images/ui_menu/btn_golumolu_exact.png" alt="Golumolu" class="card-btn-img" />
+            </button>
+
+            <!-- 3. Spirits -->
+            <button id="btn-menu-spirits" class="menu-card-btn" aria-label="Spirit Book" type="button">
+              <img src="assets/images/ui_menu/btn_spirits_exact.png" alt="Spirits" class="card-btn-img" />
+            </button>
+
+            <!-- 4. Settings -->
+            <button id="btn-menu-settings" class="menu-card-btn" aria-label="Settings" type="button">
+              <img src="assets/images/ui_menu/btn_settings_exact.png" alt="Settings" class="card-btn-img" />
+            </button>
           </div>
         </div>
-        <div class="buttons-row">
-          <button class="btn btn-back-to-menu">Save & Close</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 03 · PLAY MENU (Approved Screen 03-B)
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-play-menu" class="screen">
+      <div class="play-menu-ambient-fill"></div>
+      <div class="play-menu-stage">
+        <img class="play-menu-art-bg" src="assets/images/play_menu_bg.png" alt="Play Menu" />
+
+        <!-- Ambient sun motes -->
+        <div class="play-menu-particles" aria-hidden="true">
+          <span class="mote m1"></span>
+          <span class="mote m3"></span>
+          <span class="mote m5"></span>
+          <span class="mote m7"></span>
+        </div>
+
+        <!-- 3D Interactive Controls Layer -->
+        <div class="play-menu-interactive-layer">
+          <!-- Back Button (top left) -->
+          <button id="btn-play-back" class="play-menu-back-btn" aria-label="Back to Main Menu" type="button" data-back="menu">
+            <img src="assets/images/ui_menu/btn_play_back.png" alt="←" class="back-btn-img" />
+          </button>
+
+          <!-- 1. Continue Adventure (Golden Pill) -->
+          <button id="btn-continue" class="play-menu-pill-btn gold" aria-label="Continue Adventure" type="button">
+            <img src="assets/images/ui_menu/btn_play_continue_dynamic.png" alt="Continue Adventure" class="pill-bg-img" />
+            <span id="play-menu-level-label" class="dynamic-level-label">Level 1</span>
+          </button>
+
+          <!-- 2. New Adventure (Cream Pill) -->
+          <button id="btn-new-game" class="play-menu-pill-btn cream" aria-label="New Adventure" type="button">
+            <img src="assets/images/ui_menu/btn_play_new.png" alt="New Adventure" class="pill-bg-img" />
+          </button>
+
+          <!-- 3. Custom Play (Cream Pill) -->
+          <button id="btn-custom-play" class="play-menu-pill-btn cream" aria-label="Custom Play" type="button">
+            <img src="assets/images/ui_menu/btn_play_custom.png" alt="Custom Play" class="pill-bg-img" />
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Screen 08: In-Game HUD -->
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 04 · GARDEN LEVEL MAP
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-levels" class="screen">
+      <div style="background:var(--toast-brown);display:flex;align-items:center;gap:12px;padding:14px 20px;padding-top:max(14px,env(safe-area-inset-top))">
+        <button class="btn btn-secondary btn-sm" data-back="menu">← Back</button>
+        <span style="font-family:var(--font-head);font-size:20px;font-weight:900;color:var(--yellow);flex:1;text-align:center">Garden Campaign</span>
+      </div>
+      <!-- Chapter tabs row -->
+      <div class="level-chapters-row" id="chapter-tabs"></div>
+      <!-- Level grid -->
+      <div class="levels-main">
+        <div class="levels-grid" id="levels-grid"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 05 · LEVEL PREVIEW
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-level-preview" class="screen modal-overlay">
+      <div class="card">
+        <div class="card-header">
+          <span class="header-icon">🌿</span>
+          <h2 id="preview-title">Level 1</h2>
+          <button class="btn-close" data-back="levels">✕</button>
+        </div>
+        <div class="preview-maze-wrap">
+          <canvas id="preview-maze-canvas" width="200" height="200"></canvas>
+        </div>
+        <ul class="preview-objectives">
+          <li>🥟 Collect <strong id="preview-momos">8</strong> steamed momos</li>
+          <li>⭐ Reach the Golden Momo shrine</li>
+          <li>🚪 Escape through the Leaf Gate</li>
+          <li>❤️ Finish with <strong id="preview-hearts">3</strong> hearts</li>
+        </ul>
+        <div class="level-info-row">
+          <span>🏔️ <span id="preview-size">12×12</span></span>
+          <span>👻 <span id="preview-ghosts">1</span> spirit</span>
+        </div>
+        <div class="btn-row">
+          <button id="btn-preview-back" class="btn btn-secondary">← Back</button>
+          <button id="btn-preview-start" class="btn btn-primary">▶ Start!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 06 · LOADING
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-loading" class="screen">
+      <div class="cozy-bg"></div>
+      <div class="loading-content">
+        <div class="loading-logo">MOMO MAZE</div>
+        <div class="loading-golu" style="font-size:72px;animation:goluFloat 1.5s ease-in-out infinite">🐾</div>
+        <div class="loading-bar-wrap">
+          <div class="loading-bar" id="loading-bar" style="width:0%"></div>
+        </div>
+        <div class="loading-tip" id="loading-tip">🌸 Tip: Collect all momos to open the Golden Gate!</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 07 · TUTORIAL
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-tutorial" class="screen modal-overlay">
+      <div class="card card-wide">
+        <div class="card-header">
+          <span class="header-icon">📚</span>
+          <h2>How to Play</h2>
+        </div>
+        <div class="tutorial-steps">
+          <div class="tutorial-step">
+            <span class="step-icon">🕹️</span>
+            <div class="step-title">Move</div>
+            <div class="step-desc">WASD / Arrow Keys<br>or Touch joystick</div>
+            <div class="tutorial-keys">
+              <div></div><div class="key-cap">W</div><div></div>
+              <div class="key-cap">A</div><div class="key-cap">S</div><div class="key-cap">D</div>
+            </div>
+          </div>
+          <div class="tutorial-step">
+            <span class="step-icon">🥟</span>
+            <div class="step-title">Eat Momos</div>
+            <div class="step-desc">Walk over steamed dumplings. Collect them all!</div>
+          </div>
+          <div class="tutorial-step">
+            <span class="step-icon">⭐</span>
+            <div class="step-title">Golden Momo</div>
+            <div class="step-desc">Find the golden shrine. Eating it opens the exit gate!</div>
+          </div>
+          <div class="tutorial-step">
+            <span class="step-icon">🚪</span>
+            <div class="step-title">Escape!</div>
+            <div class="step-desc">Walk through the open Leaf Gate to win the level.</div>
+          </div>
+          <div class="tutorial-step">
+            <span class="step-icon">👻</span>
+            <div class="step-title">Watch Out!</div>
+            <div class="step-desc">Spirits will tag Golumolu. 3 hits = game over. They multiply over time!</div>
+          </div>
+        </div>
+        <div class="tutorial-dots">
+          <div class="tutorial-dot active"></div>
+        </div>
+        <div class="btn-row">
+          <button id="btn-tut-next" class="btn btn-primary">Next ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 08 · IN-GAME HUD  (phone-safe touch layout)
+         ══════════════════════════════════════════════════ -->
     <div id="screen-hud" class="screen">
-      <!-- Top Bar -->
-      <div class="hud-top-bar">
-        <div class="hud-pill" id="hud-lives">❤️ ❤️ ❤️</div>
 
-        <div class="hud-center-widgets">
-          <div class="hud-pill" id="hud-momos">🥟 0 / 6</div>
-          <div class="hud-pill" id="hud-gate-phase">Phase A</div>
-          <div class="hud-pill" id="hud-gate-timer">8s</div>
+      <!-- TOP BAR: Lives | Momos | Gate | Timer -->
+      <div class="hud-top">
+        <!-- Lives (3D heart icons rendered via HUD canvas or emoji fallback) -->
+        <div class="hud-pill" id="hud-lives">
+          <span class="heart-icon" id="h1">❤️</span>
+          <span class="heart-icon" id="h2">❤️</span>
+          <span class="heart-icon" id="h3">❤️</span>
         </div>
 
-        <div class="hud-right-widgets">
-          <div class="hud-pill" id="hud-timer">⏱️ 0:00</div>
-          <button id="btn-hud-map" class="btn btn-secondary btn-round" title="Toggle Map (M)">🗺️</button>
-          <button id="btn-hud-camera" class="btn btn-secondary btn-round" title="Toggle Camera (C)">🎥</button>
-          <button id="btn-hud-pause" class="btn btn-secondary btn-round" title="Pause (P)">⏸️</button>
-          <div class="minimap-container">
-            <canvas id="minimap-canvas" width="140" height="140"></canvas>
+        <div class="hud-center">
+          <div class="hud-pill" id="hud-gate-status">
+            <span>🚪</span>
+            <span id="hud-gate-label">Collect Momos</span>
           </div>
+        </div>
+
+        <div class="hud-right">
+          <div class="hud-pill" id="hud-momos-pill">
+            <span class="pill-icon">🥟</span>
+            <span class="pill-val" id="hud-momos">0 / 12</span>
+          </div>
+          <!-- Ghost count indicator -->
+          <div class="hud-pill" id="hud-ghosts-pill">
+            <span>👻</span>
+            <span id="hud-ghost-count">1/3</span>
+          </div>
+          <div class="hud-pill" id="hud-timer-pill">
+            <span>⏱️</span>
+            <span id="hud-timer">00:00</span>
+          </div>
+          <button id="btn-hud-pause" class="btn btn-secondary btn-round btn-pause-tactile" title="Pause (P)">⏸</button>
         </div>
       </div>
 
-      <!-- Bottom Bar -->
-      <div class="hud-bottom-bar">
-        <!-- Virtual Joystick (Mouse drag or touch support) -->
+      <!-- Tactile Circular Action Controls on Right Edge (matching Reference 08-A) -->
+      <div class="hud-tactile-actions">
+        <button id="btn-hud-map" class="btn-circle-tactile" title="Map (M)">
+          <span class="btn-icon">🗺️</span>
+        </button>
+        <button id="btn-hud-dash" class="btn-circle-tactile btn-dash" title="Dash (Space)">
+          <span class="btn-icon">🪽</span>
+        </button>
+      </div>
+
+      <!-- MINIMAP top-right (collapsible via Map button or M) -->
+      <div class="minimap-wrap" id="minimap-wrap" style="display: none;">
+        <canvas id="minimap-canvas" width="128" height="128"></canvas>
+      </div>
+
+      <!-- BOTTOM BAR: Tactile Virtual Joystick + controls hint -->
+      <div class="hud-bottom">
         <div id="virtual-joystick">
+          <span class="joy-arrow joy-up">▲</span>
+          <span class="joy-arrow joy-down">▼</span>
+          <span class="joy-arrow joy-left">◀</span>
+          <span class="joy-arrow joy-right">▶</span>
           <div id="joystick-stick"></div>
         </div>
-        <div class="controls-hint">
-          ⌨️ <strong>W A S D</strong> to move | <strong>M</strong> Map | <strong>C</strong> Camera
+        <div class="controls-hint" id="controls-hint">
+          <strong>WASD</strong> move &nbsp;|&nbsp; <strong>Space</strong> dash &nbsp;|&nbsp; <strong>M</strong> map &nbsp;|&nbsp; <strong>P</strong> pause
         </div>
       </div>
+
+      <!-- Ghost split warning flash -->
+      <div class="invuln-flash" id="invuln-flash"></div>
     </div>
 
-    <!-- Screen 09: Fullscreen Blueprint Map Overlay -->
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 09 · MAP OVERLAY
+         ══════════════════════════════════════════════════ -->
     <div id="map-overlay" class="screen modal-overlay">
-      <div class="card-dialog map-card">
+      <div class="card">
         <div class="card-header">
+          <span class="header-icon">🗺️</span>
           <h2>Garden Blueprint</h2>
-          <p class="subtitle">Live maze layout, collectibles, gates & exit arch</p>
+          <button class="btn-close" id="btn-close-map">✕</button>
         </div>
         <canvas id="fullmap-canvas" width="440" height="440"></canvas>
-        <div class="buttons-row">
-          <button id="btn-close-map" class="btn">Close Map (M)</button>
+        <div class="map-legend">
+          <div class="map-legend-item"><div class="legend-dot" style="background:#4E8C2A"></div>Wall</div>
+          <div class="map-legend-item"><div class="legend-dot" style="background:#FFD54F"></div>Momo</div>
+          <div class="map-legend-item"><div class="legend-dot" style="background:#FFB300"></div>Golden</div>
+          <div class="map-legend-item"><div class="legend-dot" style="background:#FF7043"></div>Golumolu</div>
+          <div class="map-legend-item"><div class="legend-dot" style="background:#FFF9C4"></div>Spirit</div>
+        </div>
+        <div class="btn-row">
+          <button id="btn-close-map2" class="btn btn-primary">Close Map (M)</button>
         </div>
       </div>
     </div>
 
-    <!-- Screen 10: Pause Menu -->
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 10 · PAUSE MENU
+         ══════════════════════════════════════════════════ -->
     <div id="screen-pause" class="screen modal-overlay">
-      <div class="card-dialog" style="max-width: 420px;">
+      <div class="card card-narrow">
         <div class="card-header">
-          <h2>Game Paused</h2>
-          <p class="subtitle">Take a cozy breath 🍵</p>
+          <span class="header-icon">⏸️</span>
+          <h2>Paused</h2>
         </div>
-        <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:24px;">
-          <button id="btn-pause-resume" class="btn">Resume Adventure</button>
-          <button id="btn-pause-restart" class="btn btn-secondary">Restart Level</button>
-          <button id="btn-pause-menu" class="btn btn-secondary">Quit to Menu</button>
+        <div class="pause-info" id="pause-info">
+          <span>❤️ <span id="pause-lives">3</span></span>
+          <span>🥟 <span id="pause-momos">0/8</span></span>
+          <span>⏱ <span id="pause-time">0:00</span></span>
         </div>
+        <button id="btn-resume" class="btn btn-primary" style="margin-bottom:10px">▶ Resume</button>
+        <button id="btn-restart" class="btn btn-secondary" style="margin-bottom:10px">↺ Restart Level</button>
+        <button id="btn-pause-settings" class="btn btn-secondary" style="margin-bottom:10px">⚙️ Settings</button>
+        <button id="btn-quit-menu" class="btn btn-secondary">🏠 Main Menu</button>
       </div>
     </div>
 
-    <!-- Screen 11: Victory Screen -->
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 11 · VICTORY
+         ══════════════════════════════════════════════════ -->
     <div id="screen-victory" class="screen modal-overlay">
-      <div class="card-dialog">
+      <div class="card" style="text-align:center">
         <div class="card-header">
-          <h2>🎉 Garden Victory! 🎉</h2>
-          <p class="subtitle" id="vic-level-name">Level Complete!</p>
+          <span class="header-icon">🎉</span>
+          <h2>Level Complete!</h2>
         </div>
+        <div class="victory-title" id="vic-title">Level 1 Clear!</div>
+        <!-- 3 star row (uses 3D star GLBs rendered in mini canvas OR emoji) -->
         <div class="stars-row" id="vic-stars">⭐ ⭐ ⭐</div>
-        <div class="stats-summary">
-          <span id="vic-time">Time: 42s</span>
-          <span id="vic-momos">Momos: 6/6</span>
+        <div class="victory-stats">
+          <div class="victory-stat">
+            <div class="stat-label">⏱ Time</div>
+            <div class="stat-val" id="vic-time">0:00</div>
+          </div>
+          <div class="victory-stat">
+            <div class="stat-label">🥟 Momos</div>
+            <div class="stat-val" id="vic-momos">8/8</div>
+          </div>
+          <div class="victory-stat">
+            <div class="stat-label">❤️ Hearts</div>
+            <div class="stat-val" id="vic-hearts">3/3</div>
+          </div>
         </div>
-        <p style="color:var(--accent-green); font-size:16px; font-weight:600; margin-bottom:20px;">
-          Golumolu happily enjoyed all the delicious dumplings!
-        </p>
-        <div class="buttons-row">
-          <button id="btn-vic-next" class="btn btn-green">Next Level ➔</button>
-          <button id="btn-vic-replay" class="btn btn-secondary">Replay ↺</button>
-          <button id="btn-vic-menu" class="btn btn-secondary">Main Menu</button>
+        <div class="btn-row">
+          <button id="btn-vic-replay" class="btn btn-secondary">↺ Replay</button>
+          <button id="btn-vic-next"   class="btn btn-primary">Next Level ▶</button>
         </div>
+        <button id="btn-vic-menu" class="btn btn-secondary" style="margin-top:8px;width:100%">🏠 Main Menu</button>
       </div>
     </div>
 
-    <!-- Screen 12: Defeat Screen -->
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 12 · DEFEAT  "Oh, Crumbs!"
+         ══════════════════════════════════════════════════ -->
     <div id="screen-defeat" class="screen modal-overlay">
-      <div class="card-dialog" style="max-width: 460px;">
-        <div class="card-header">
-          <h2>👻 Oh no! 👻</h2>
-          <p class="subtitle">A playful garden spirit tagged Golumolu!</p>
+      <div class="card card-narrow" style="text-align:center">
+        <div class="card-header" style="background:#8B2323">
+          <span class="header-icon">💔</span>
+          <h2 style="color:#FFB3B3">Oh, Crumbs!</h2>
         </div>
-        <p style="font-size:16px; color:var(--text-muted); margin:12px 0 24px 0;">
-          Don't worry, the spirits just wanted to play tag. Ready to try again?
-        </p>
-        <div class="buttons-row">
-          <button id="btn-def-retry" class="btn">Try Again ↺</button>
-          <button id="btn-def-menu" class="btn btn-secondary">Back to Menu</button>
+        <div class="defeat-ghosts">👻👻</div>
+        <div class="defeat-title">The spirits caught Golumolu!</div>
+        <div class="defeat-msg">Don't worry — Golumolu just wants more momos. Ready to try again?</div>
+        <div class="btn-row">
+          <button id="btn-def-menu"  class="btn btn-secondary">🏠 Menu</button>
+          <button id="btn-def-retry" class="btn btn-primary">↺ Try Again</button>
         </div>
       </div>
     </div>
 
-  </div>
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 13 · CHAPTER COMPLETE
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-chapter" class="screen modal-overlay">
+      <div class="card" style="text-align:center">
+        <div class="card-header">
+          <span class="header-icon">🌟</span>
+          <h2>Chapter Complete!</h2>
+        </div>
+        <div class="chapter-banner">
+          <h3 id="chapter-name">Chapter 1: The Morning Meadow</h3>
+          <p id="chapter-sub">You cleared Levels 1–5!</p>
+        </div>
+        <div class="chapter-reward">
+          <p>🎁 Chapter Reward Unlocked!</p>
+          <p id="chapter-reward-name" style="margin-top:4px;font-size:13px;color:var(--text-muted)">New sticker: 🌸 Sakura Golumolu</p>
+        </div>
+        <div class="btn-row">
+          <button id="btn-chap-menu"     class="btn btn-secondary">🏠 Main Menu</button>
+          <button id="btn-chap-continue" class="btn btn-primary">▶ Continue</button>
+        </div>
+      </div>
+    </div>
 
-  <!-- Game Scripts (ES Modules) -->
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 14 · GOLUMOLU'S CLOSET
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-closet" class="screen">
+      <div style="background:var(--toast-brown);display:flex;align-items:center;gap:12px;padding:14px 20px;padding-top:max(14px,env(safe-area-inset-top))">
+        <button class="btn btn-secondary btn-sm" data-back="menu">← Back</button>
+        <span style="font-family:var(--font-head);font-size:20px;font-weight:900;color:var(--yellow);flex:1;text-align:center">Golumolu's Closet</span>
+      </div>
+      <div class="closet-layout">
+        <div class="closet-tabs" id="closet-tabs">
+          <div class="closet-tab active" data-tab="outfits"><span class="tab-icon">👗</span>Outfits</div>
+          <div class="closet-tab" data-tab="hats"><span class="tab-icon">🎩</span>Hats</div>
+          <div class="closet-tab" data-tab="accessories"><span class="tab-icon">💫</span>Extras</div>
+          <div class="closet-tab" data-tab="trails"><span class="tab-icon">✨</span>Trails</div>
+        </div>
+        <div class="closet-items" id="closet-items"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 15 · SPIRIT BOOK
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-spirits" class="screen">
+      <div style="background:var(--toast-brown);display:flex;align-items:center;gap:12px;padding:14px 20px;padding-top:max(14px,env(safe-area-inset-top))">
+        <button class="btn btn-secondary btn-sm" data-back="menu">← Back</button>
+        <span style="font-family:var(--font-head);font-size:20px;font-weight:900;color:var(--yellow);flex:1;text-align:center">Spirit Book</span>
+      </div>
+      <div class="spirits-layout">
+        <div class="spirits-tabs" id="spirit-tabs"></div>
+        <div class="spirit-detail" id="spirit-detail"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 16 · STICKER COLLECTION
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-stickers" class="screen modal-overlay">
+      <div class="card card-wide">
+        <div class="card-header">
+          <span class="header-icon">🌟</span>
+          <h2>Sticker Collection</h2>
+          <button class="btn-close" data-back="menu">✕</button>
+        </div>
+        <div class="stickers-count" id="stickers-count">0 / 12 Stickers</div>
+        <div class="stickers-grid" id="stickers-grid"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" data-back="menu">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 17 · CUSTOM PLAY
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-custom" class="screen modal-overlay">
+      <div class="card">
+        <div class="card-header">
+          <span class="header-icon">🎲</span>
+          <h2>Custom Play</h2>
+          <button class="btn-close" data-back="play-menu">✕</button>
+        </div>
+        <!-- Ghost count -->
+        <div class="custom-row">
+          <span class="custom-label">👻 Ghost Count</span>
+          <div class="custom-chips" id="chip-ghosts">
+            <div class="chip selected" data-val="1">1</div>
+            <div class="chip" data-val="2">2</div>
+            <div class="chip" data-val="3">3</div>
+            <div class="chip" data-val="4">4</div>
+          </div>
+        </div>
+        <!-- Maze size -->
+        <div class="custom-row">
+          <span class="custom-label">🔲 Maze Size</span>
+          <div class="custom-chips" id="chip-size">
+            <div class="chip selected" data-val="12">Small</div>
+            <div class="chip" data-val="17">Medium</div>
+            <div class="chip" data-val="23">Large</div>
+            <div class="chip" data-val="31">Grand</div>
+          </div>
+        </div>
+        <!-- Ghost speed -->
+        <div class="custom-row">
+          <span class="custom-label">⚡ Spirit Speed</span>
+          <div class="custom-chips" id="chip-speed">
+            <div class="chip selected" data-val="0.7">Slow</div>
+            <div class="chip" data-val="1.0">Normal</div>
+            <div class="chip" data-val="1.4">Fast</div>
+          </div>
+        </div>
+        <!-- Living gates -->
+        <div class="custom-row">
+          <span class="custom-label">🚦 Living Gates</span>
+          <div class="toggle-track" id="toggle-gates">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+        <!-- Time limit -->
+        <div class="custom-row">
+          <span class="custom-label">⏱ Time Limit</span>
+          <div class="toggle-track" id="toggle-time">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button id="btn-custom-start" class="btn btn-primary">▶ Start!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 18 · SETTINGS
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-settings" class="screen modal-overlay">
+      <div class="card">
+        <div class="card-header">
+          <span class="header-icon">⚙️</span>
+          <h2>Settings</h2>
+          <button class="btn-close" data-back="menu">✕</button>
+        </div>
+        <div class="scroll-body">
+          <!-- Audio -->
+          <div class="settings-section">
+            <div class="settings-section-title">🔊 Audio</div>
+            <div class="settings-row">
+              <span class="settings-label">Master Volume</span>
+              <input type="range" class="styled-slider" id="slider-master" min="0" max="100" value="80">
+            </div>
+            <div class="settings-row">
+              <span class="settings-label">Sound Effects</span>
+              <input type="range" class="styled-slider" id="slider-sfx" min="0" max="100" value="80">
+            </div>
+            <div class="settings-row">
+              <span class="settings-label">Garden Music</span>
+              <input type="range" class="styled-slider" id="slider-bgm" min="0" max="100" value="60">
+            </div>
+          </div>
+          <!-- Display -->
+          <div class="settings-section">
+            <div class="settings-section-title">🎥 Display</div>
+            <div class="settings-row">
+              <span class="settings-label">Camera View</span>
+              <select id="sel-camera" style="padding:6px 12px;border-radius:50px;border:2px solid var(--border-warm);font-family:var(--font-body);font-weight:700;font-size:13px;background:white;color:var(--text-brown)">
+                <option value="iso">Cozy Isometric</option>
+                <option value="top">Top-Down</option>
+              </select>
+            </div>
+            <div class="settings-row">
+              <span class="settings-label">Mute All Sound</span>
+              <div class="toggle-track" id="toggle-mute"><div class="toggle-knob"></div></div>
+            </div>
+          </div>
+          <!-- Controls -->
+          <div class="settings-section">
+            <div class="settings-section-title">🎮 Controls</div>
+            <div style="background:rgba(255,255,255,0.6);border-radius:14px;padding:12px 16px;font-size:13px;line-height:1.9;color:var(--text-muted);font-weight:600">
+              <strong style="color:var(--text-brown)">Keyboard:</strong><br>
+              WASD / Arrow Keys → Move Golumolu<br>
+              M → Map overlay &nbsp;&nbsp; P / Esc → Pause<br>
+              C → Switch camera angle<br>
+              Scroll Wheel → Zoom
+            </div>
+          </div>
+          <!-- Accessibility -->
+          <div class="settings-section">
+            <div class="settings-section-title">♿ Accessibility</div>
+            <div class="settings-row">
+              <span class="settings-label">Music Only</span>
+              <div class="toggle-track" id="toggle-musiconly"><div class="toggle-knob"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" data-back="menu">Save &amp; Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         SCREEN 19 · CREDITS
+         ══════════════════════════════════════════════════ -->
+    <div id="screen-credits" class="screen modal-overlay">
+      <div class="card" style="text-align:center">
+        <div class="card-header">
+          <span class="header-icon">🌸</span>
+          <h2>Credits</h2>
+          <button class="btn-close" data-back="menu">✕</button>
+        </div>
+        <div class="credits-logo">MOMO MAZE</div>
+        <div class="credits-tagline">A Cozy Garden Adventure<br>Made with love, care and plenty of momos.</div>
+        <div class="credits-section">
+          <h4>🛠 Tools &amp; Technologies</h4>
+          <div class="credits-entry">Three.js — 3D Rendering Engine</div>
+          <div class="credits-entry">Blender 5.2 — 3D Art &amp; Modelling</div>
+          <div class="credits-entry">Capacitor — Mobile Packaging</div>
+        </div>
+        <div class="credits-section">
+          <h4>🎨 Art &amp; Design</h4>
+          <div class="credits-entry">Golumolu, Ghosts, Maze — Original Concept Art</div>
+          <div class="credits-entry">UI Design — Based on approved screen references</div>
+        </div>
+        <div class="credits-section">
+          <h4>🔤 Fonts</h4>
+          <div class="credits-entry">Baloo 2 &amp; Nunito — Google Fonts (OFL)</div>
+        </div>
+        <div style="margin-top:16px;font-size:13px;color:var(--text-muted)">Thank you for playing! 🌸</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" data-back="menu">← Back to Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         TOAST NOTIFICATIONS (floating, above all)
+         ══════════════════════════════════════════════════ -->
+    <div id="toast-container"></div>
+
+  </div><!-- /#ui-layer -->
+
+  <!-- GAME SCRIPTS -->
   <script type="module" src="js/game.js"></script>
+
 </body>
 </html>

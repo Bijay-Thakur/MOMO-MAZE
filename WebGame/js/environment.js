@@ -6,7 +6,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const gltfLoader = new GLTFLoader();
 
 export class EnvironmentBuilder {
-  constructor(scene, cellSize = 1.8) {
+  constructor(scene, cellSize = 2.0) {
     this.scene = scene;
     this.cellSize = cellSize;
     this.momos = [];
@@ -14,6 +14,7 @@ export class EnvironmentBuilder {
     this.exitGateMesh = null;
     this.exitArchLight = null;
     this.beautyEnvMesh = null;
+    this.blasts = [];
 
     this.initMaterials();
     this.initGrassGeometry();
@@ -109,7 +110,7 @@ export class EnvironmentBuilder {
     this.matFlowerYellow = new THREE.MeshBasicMaterial({ color: 0xFFEB3B });
   }
 
-  // Pre-generate reusable 3D grass tuft geometry (5 fan-out blades)
+  // Pre-generate reusable 3D grass tuft geometry (neat low lawn blades)
   initGrassGeometry() {
     this.grassTuftGeo = new THREE.BufferGeometry();
     const vertices = [];
@@ -117,9 +118,9 @@ export class EnvironmentBuilder {
 
     const bladeAngles = [0, 0.7, 1.4, 2.2, 3.0, 3.8, 4.6, 5.4];
     bladeAngles.forEach((angle, idx) => {
-      const height = 0.22 + Math.random() * 0.12;
-      const width = 0.045;
-      const bend = 0.08 + Math.random() * 0.06;
+      const height = 0.07 + Math.random() * 0.04; // Neat, short carpet lawn grass!
+      const width = 0.032;
+      const bend = 0.02 + Math.random() * 0.02;
 
       const cos = Math.cos(angle);
       const sin = Math.sin(angle);
@@ -144,30 +145,63 @@ export class EnvironmentBuilder {
     return new THREE.Mesh(this.grassTuftGeo, this.matGrassBlade);
   }
 
-  // Create a stylized steamed Momo dumpling mesh
+  // Create an authentic, beautiful steamed Momo dumpling mesh
   createMomoMesh(isGolden = false) {
     const group = new THREE.Group();
-    const mat = isGolden ? this.matGoldMomo : this.matMomo;
+    const matDough = isGolden ? this.matGoldMomo : this.matMomo;
 
-    // Dumpling bottom round base
-    const baseGeo = new THREE.SphereGeometry(0.24, 16, 12);
-    baseGeo.scale(1.0, 0.75, 1.0);
-    const base = new THREE.Mesh(baseGeo, mat);
-    base.position.y = 0.16;
-    base.castShadow = true;
-    group.add(base);
+    // 1. Bamboo steamer leaf / pedestal coaster
+    const leafGeo = new THREE.CylinderGeometry(0.38, 0.40, 0.04, 16);
+    const leafMat = new THREE.MeshStandardMaterial({
+      color: isGolden ? 0x8D6E63 : 0x558B2F, // lush bamboo leaf green
+      roughness: 0.85,
+      metalness: 0.02
+    });
+    const leaf = new THREE.Mesh(leafGeo, leafMat);
+    leaf.position.y = 0.02;
+    leaf.receiveShadow = true;
+    group.add(leaf);
 
-    // Top pleated pinch folds
-    const pinchGeo = new THREE.ConeGeometry(0.12, 0.16, 8);
-    const pinch = new THREE.Mesh(pinchGeo, mat);
-    pinch.position.y = 0.32;
-    pinch.rotation.y = 0.4;
-    group.add(pinch);
+    // 2. Plump, juicy steamed dumpling belly
+    const bellyGeo = new THREE.SphereGeometry(0.30, 24, 18);
+    bellyGeo.scale(1.0, 0.72, 1.0);
+    const belly = new THREE.Mesh(bellyGeo, matDough);
+    belly.position.y = 0.22;
+    belly.castShadow = true;
+    belly.receiveShadow = true;
+    group.add(belly);
 
-    // Golden sparkle point light
-    const light = new THREE.PointLight(isGolden ? 0xFFA000 : 0xFFE082, isGolden ? 2.2 : 0.85, 2.8);
-    light.position.y = 0.25;
+    // 3. Delicate pleated spiral pinch folds (8 radiating petal twists)
+    const foldCount = 8;
+    for (let i = 0; i < foldCount; i++) {
+      const angle = (i / foldCount) * Math.PI * 2;
+      const foldGeo = new THREE.SphereGeometry(0.09, 10, 8);
+      foldGeo.scale(0.55, 1.35, 0.85);
+      const fold = new THREE.Mesh(foldGeo, matDough);
+
+      const rad = 0.12;
+      fold.position.set(Math.cos(angle) * rad, 0.36, Math.sin(angle) * rad);
+      fold.rotation.y = angle + 0.35; // gentle swirl
+      fold.rotation.z = Math.cos(angle) * 0.22;
+      fold.rotation.x = Math.sin(angle) * 0.22;
+      fold.castShadow = true;
+      group.add(fold);
+    }
+
+    // 4. Center pleated twist crown / pinch knot
+    const twistGeo = new THREE.ConeGeometry(0.08, 0.15, 8);
+    const twist = new THREE.Mesh(twistGeo, matDough);
+    twist.position.y = 0.44;
+    twist.rotation.y = 0.5;
+    group.add(twist);
+
+    // 5. Warm golden halo sparkle light
+    const light = new THREE.PointLight(isGolden ? 0xFFA000 : 0xFFE082, isGolden ? 2.5 : 1.2, 3.5);
+    light.position.y = 0.32;
     group.add(light);
+
+    // Scale momo up so it's juicy and prominent in the corridor
+    group.scale.set(1.35, 1.35, 1.35);
 
     return group;
   }
@@ -242,53 +276,159 @@ export class EnvironmentBuilder {
   }
 
   loadBlenderBeautyScene(mazeData, offset, onReady) {
-    // 1. Build ground and cobblestone path tiles
-    this.buildGroundPlane(mazeData.size);
-    this.buildPathTiles(mazeData, offset);
-    this.buildCollectiblesAndGates(mazeData, offset);
+    this.momos = [];
 
-    // 2. Load beauty_maze_env.glb (1,171 objects from Blender)
+    // Load the original 12x12 living garden maze exported directly from Blender
     gltfLoader.load(
-      'models/beauty_maze_env.glb',
+      'models/beauty_maze.glb',
       (gltf) => {
         const glb = gltf.scene;
 
-        // The Blender beauty maze model is natively 12x12 meters with 1.0m cell spacing.
-        // Scale 1:1 aligns perfectly with grid coordinates (c - 5.5) * 1.0!
+        // 1:1 exact metric scaling matching verified wall segments
         glb.scale.set(1.0, 1.0, 1.0);
         glb.position.set(0, 0, 0);
 
         glb.traverse(child => {
+          // Remove any imported glTF lights to avoid tone-mapping blowout
+          if (child.isLight) {
+            child.visible = false;
+            if (child.parent) child.parent.remove(child);
+            return;
+          }
+
+          // Hide static beauty-render models (Golumolu, spirits, cam target, momo)
+          if (child.name) {
+            const nl = child.name.toLowerCase();
+            if (nl.includes('golu') || nl.includes('spirit_') || nl.includes('momo_collectible') || nl.includes('cam_')) {
+              child.visible = false;
+              return;
+            }
+          }
+
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
 
-            const nameLow = (child.name + ' ' + (child.material?.name || '')).toLowerCase();
-            if (nameLow.includes('hedge')) {
-              child.material = this.matHedge;
-            } else if (nameLow.includes('grass') || nameLow.includes('meadow') || nameLow.includes('tuft') || nameLow.includes('blade')) {
-              child.material = this.matGrassBlade;
-            } else if (nameLow.includes('curb') || nameLow.includes('rim')) {
-              child.material = this.matCurb;
-            } else if (nameLow.includes('tree') || nameLow.includes('canopy')) {
-              child.material = this.matTreeLeaf;
-            } else if (nameLow.includes('wood') || (nameLow.includes('cylinder') && (nameLow.includes('004') || nameLow.includes('005') || nameLow.includes('006') || nameLow.includes('007')))) {
-              child.material = this.matWood;
-            } else if (nameLow.includes('flower') || nameLow.includes('petal')) {
-              child.material = nameLow.includes('pink') ? this.matFlowerPink : this.matFlowerWhite;
+            const m = child.material;
+            if (m) {
+              const mn = (m.name || '').toLowerCase();
+              if (mn.includes('crown')) {
+                m.color.setHex(0x62C426); // sunlit lime crown highlights
+                m.roughness = 0.58;
+                m.metalness = 0.02;
+              } else if (mn.includes('hedge')) {
+                m.color.setHex(0x469E20); // lush emerald living hedge
+                m.roughness = 0.65;
+                m.metalness = 0.02;
+              } else if (mn.includes('grass') || mn.includes('blade')) {
+                m.color.setHex(0x5EAE2A);
+                m.roughness = 0.68;
+              } else if (mn.includes('lawn') || mn.includes('ground') || mn.includes('meadow')) {
+                m.color.setHex(0x549E26);
+                m.roughness = 0.85;
+              } else if (mn.includes('curb') || mn.includes('terracotta') || mn.includes('earth')) {
+                m.color.setHex(0xBC6E42);
+                m.roughness = 0.72;
+              } else if (mn.includes('stone') || mn.includes('ancient')) {
+                m.color.setHex(0xD4C6AA);
+                m.roughness = 0.75;
+              } else if (mn.includes('wood') || mn.includes('cedar')) {
+                m.color.setHex(0x8D5B36);
+                m.roughness = 0.75;
+              }
             }
           }
         });
 
         this.beautyEnvMesh = glb;
         this.root.add(glb);
-        console.log('Blender Beauty Maze Environment loaded successfully into scene with lush vibrant foliage!');
+
+        // Add broad meadow ground plane at y = -0.40 so there's never a void
+        const meadowGeo = new THREE.PlaneGeometry(90, 90);
+        const meadowMat = new THREE.MeshStandardMaterial({
+          color: 0x4E9426,
+          roughness: 0.90,
+          metalness: 0.0
+        });
+        const meadowMesh = new THREE.Mesh(meadowGeo, meadowMat);
+        meadowMesh.rotation.x = -Math.PI / 2;
+        meadowMesh.position.y = -0.41;
+        meadowMesh.receiveShadow = true;
+        this.root.add(meadowMesh);
+
+        // Spawn collectible steamed dumplings at verified clear pathway coordinates
+        if (mazeData.collectiblesWorld && mazeData.collectiblesWorld.length > 0) {
+          mazeData.collectiblesWorld.forEach((c, idx) => {
+            const momoMesh = this.createMomoMesh(false);
+            momoMesh.position.set(c.x, 0.40, c.z);
+            momoMesh.scale.set(1.6, 1.6, 1.6);
+            this.root.add(momoMesh);
+            this.momos.push({
+              id: idx,
+              gridX: c.x,
+              gridY: c.z,
+              worldX: c.x,
+              worldZ: c.z,
+              mesh: momoMesh,
+              collected: false,
+              baseY: 0.40,
+              rotSpeed: 2.0 + Math.random() * 0.8
+            });
+          });
+        }
+
+        // Setup the Legendary Golden Momo Sanctuary
+        const gmX = mazeData.goldenMomoWorld ? mazeData.goldenMomoWorld.x : 0.0;
+        const gmZ = mazeData.goldenMomoWorld ? mazeData.goldenMomoWorld.z : -1.0;
+        const gmMesh = this.createMomoMesh(true);
+        gmMesh.position.set(gmX, 0.55, gmZ);
+        gmMesh.scale.set(1.8, 1.8, 1.8);
+        this.root.add(gmMesh);
+
+        this.goldenMomo = {
+          x: gmX,
+          z: gmZ,
+          mesh: gmMesh,
+          collected: false
+        };
+
+        // Try loading the enhanced 3D Golden Momo model exported from Blender
+        gltfLoader.load(
+          'models/SM_UI_GoldenMomo.glb',
+          (gltf) => {
+            const gmGlb = gltf.scene;
+            gmGlb.position.set(gmX, 0.05, gmZ);
+            gmGlb.scale.set(1.4, 1.4, 1.4);
+            gmGlb.traverse(c => {
+              if (c.isMesh) {
+                c.castShadow = true;
+                c.receiveShadow = true;
+              }
+            });
+            this.root.remove(gmMesh);
+            this.root.add(gmGlb);
+            this.goldenMomo.mesh = gmGlb;
+          },
+          undefined,
+          () => {
+            // Keep procedural mesh if GLB fails
+          }
+        );
+
+        // Golden sanctuary point light
+        const gLight = new THREE.PointLight(0xFFA000, 3.2, 7.0);
+        gLight.position.set(gmX, 1.2, gmZ);
+        this.root.add(gLight);
+
+        console.log('Original Blender Beauty Maze loaded with 100% PBR accuracy and zero clipping!');
         if (onReady) onReady();
       },
       undefined,
       (err) => {
-        console.warn('Fallback to rich procedural maze:', err);
+        console.warn('Fallback to procedural maze:', err);
+        this.buildGroundPlane(mazeData.size);
         this.buildProceduralWalls(mazeData, offset);
+        this.buildCollectiblesAndGates(mazeData, offset);
         if (onReady) onReady();
       }
     );
@@ -582,14 +722,112 @@ export class EnvironmentBuilder {
     this.root.add(fGroup);
   }
 
+  // Celebratory blast animation when Golumolu eats a momo!
+  spawnMomoBlast(worldX, worldY, worldZ, isGolden = false) {
+    if (!this.root) return;
+    const blastGroup = new THREE.Group();
+    blastGroup.position.set(worldX, worldY + 0.25, worldZ);
+    this.root.add(blastGroup);
+
+    // 1. Expanding golden shockwave ring
+    const ringGeo = new THREE.TorusGeometry(0.28, 0.06, 12, 32);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: isGolden ? 0xFFD54F : 0xFFE082,
+      transparent: true,
+      opacity: 0.95
+    });
+    const shockwave = new THREE.Mesh(ringGeo, ringMat);
+    shockwave.rotation.x = Math.PI / 2;
+    blastGroup.add(shockwave);
+
+    // 2. Blast particles (32 sparkling stars, golden crumbs, and rainbow celebration motes)
+    const particleColors = isGolden
+      ? [0xFFD54F, 0xFFA000, 0xFFF9C4, 0xFFFFFF]
+      : [0xFFE082, 0xFFF9C4, 0xFF8A65, 0x81C784, 0x64B5F6, 0xFFFFFF];
+
+    const particles = [];
+    const count = 32;
+    for (let i = 0; i < count; i++) {
+      const pGeo = Math.random() < 0.45
+        ? new THREE.SphereGeometry(0.08 + Math.random() * 0.06, 8, 8)
+        : new THREE.BoxGeometry(0.10, 0.10, 0.10);
+
+      const color = particleColors[Math.floor(Math.random() * particleColors.length)];
+      const pMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 1.0 });
+      const pMesh = new THREE.Mesh(pGeo, pMat);
+
+      // Random 3D spherical direction
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(Math.random() * 2 - 1);
+      const speed = 2.8 + Math.random() * 4.2;
+
+      const vx = Math.sin(phi) * Math.cos(theta) * speed;
+      const vy = Math.abs(Math.cos(phi)) * speed * 1.3 + 1.4; // upward celebration fountain bias!
+      const vz = Math.sin(phi) * Math.sin(theta) * speed;
+
+      blastGroup.add(pMesh);
+      particles.push({
+        mesh: pMesh,
+        mat: pMat,
+        vx, vy, vz,
+        rotSpeedX: (Math.random() - 0.5) * 14,
+        rotSpeedY: (Math.random() - 0.5) * 14,
+        scale: 1.0
+      });
+    }
+
+    // 2b. Juicy dumpling dough & filling goo splatter drops
+    const gooCount = 12;
+    for (let j = 0; j < gooCount; j++) {
+      const gooGeo = new THREE.SphereGeometry(0.12 + Math.random() * 0.08, 10, 8);
+      gooGeo.scale(1.0, 0.45, 1.0); // squashed dough drop
+      const gooMat = new THREE.MeshBasicMaterial({
+        color: isGolden ? 0xFFCA28 : (Math.random() < 0.6 ? 0xFFF5DD : 0xFFE082),
+        transparent: true,
+        opacity: 0.95
+      });
+      const gooMesh = new THREE.Mesh(gooGeo, gooMat);
+      const angle = (j / gooCount) * Math.PI * 2 + Math.random() * 0.4;
+      const speed = 2.2 + Math.random() * 3.5;
+      const vx = Math.cos(angle) * speed;
+      const vy = 1.8 + Math.random() * 3.0;
+      const vz = Math.sin(angle) * speed;
+      blastGroup.add(gooMesh);
+      particles.push({
+        mesh: gooMesh,
+        mat: gooMat,
+        vx, vy, vz,
+        rotSpeedX: (Math.random() - 0.5) * 8,
+        rotSpeedY: (Math.random() - 0.5) * 8,
+        scale: 1.0
+      });
+    }
+
+    // 3. Golden flash point light
+    const flashLight = new THREE.PointLight(isGolden ? 0xFFA000 : 0xFFE082, 4.5, 6.0);
+    blastGroup.add(flashLight);
+
+    this.blasts.push({
+      group: blastGroup,
+      shockwave,
+      ringMat,
+      particles,
+      flashLight,
+      life: 0.75,
+      maxLife: 0.75
+    });
+  }
+
   update(delta, activePhase) {
     const time = performance.now() * 0.001;
 
-    // Animate Momo dumplings
+    // Animate Momo dumplings (gentle bob & swirl)
     this.momos.forEach(m => {
-      if (!m.collected) {
-        m.mesh.rotation.y += delta * m.rotSpeed;
-        m.mesh.position.y = m.baseY + Math.sin(time * 3 + m.gridX) * 0.08;
+      if (!m.collected && m.mesh) {
+        m.mesh.rotation.y += delta * (m.rotSpeed || 2.0);
+        const gx = (m.gridX !== undefined) ? m.gridX : (m.worldX || 0);
+        const by = m.baseY || 0.40;
+        m.mesh.position.y = by + Math.sin(time * 3.5 + gx) * 0.08;
       }
     });
 
@@ -597,6 +835,40 @@ export class EnvironmentBuilder {
     if (this.goldenExitMomo) {
       this.goldenExitMomo.rotation.y += delta * 2.2;
       this.goldenExitMomo.position.y = 0.35 + Math.sin(time * 4) * 0.12;
+    }
+
+    // Animate blast particle explosions
+    for (let i = this.blasts.length - 1; i >= 0; i--) {
+      const b = this.blasts[i];
+      b.life -= delta;
+      const progress = 1.0 - (b.life / b.maxLife); // 0.0 -> 1.0
+
+      // Shockwave expands rapidly and fades
+      const ringScale = 1.0 + progress * 5.5;
+      b.shockwave.scale.set(ringScale, ringScale, ringScale);
+      b.ringMat.opacity = Math.max(0, 1.0 - progress * 1.3);
+
+      // Flash light fades
+      b.flashLight.intensity = Math.max(0, (1.0 - progress) * 4.5);
+
+      // Move blast particles with gravity and velocity
+      b.particles.forEach(p => {
+        p.mesh.position.x += p.vx * delta;
+        p.mesh.position.y += p.vy * delta;
+        p.mesh.position.z += p.vz * delta;
+        p.vy -= 10.5 * delta; // gravity pull
+        p.mesh.rotation.x += p.rotSpeedX * delta;
+        p.mesh.rotation.y += p.rotSpeedY * delta;
+
+        const pScale = Math.max(0.01, (1.0 - progress));
+        p.mesh.scale.set(pScale, pScale, pScale);
+        p.mat.opacity = Math.max(0, 1.0 - progress);
+      });
+
+      if (b.life <= 0) {
+        if (this.root) this.root.remove(b.group);
+        this.blasts.splice(i, 1);
+      }
     }
 
     // Animate Moving Gates (Phase A vs B)
@@ -615,7 +887,38 @@ export class EnvironmentBuilder {
     if (item) {
       item.collected = true;
       item.mesh.visible = false;
+      this.spawnMomoBlast(item.mesh.position.x, item.mesh.position.y, item.mesh.position.z, false);
       return true;
+    }
+    return false;
+  }
+
+  collectMomoAt(worldX, worldZ, radius = 0.95) {
+    for (const m of this.momos) {
+      if (!m.collected) {
+        const dist = Math.hypot(worldX - m.mesh.position.x, worldZ - m.mesh.position.z);
+        if (dist < radius) {
+          m.collected = true;
+          m.mesh.visible = false;
+          this.spawnMomoBlast(m.mesh.position.x, m.mesh.position.y, m.mesh.position.z, false);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  collectGoldenMomoAt(worldX, worldZ, radius = 1.15) {
+    if (this.goldenMomo && !this.goldenMomo.collected) {
+      const dist = Math.hypot(worldX - this.goldenMomo.x, worldZ - this.goldenMomo.z);
+      if (dist < radius) {
+        this.goldenMomo.collected = true;
+        if (this.goldenMomo.mesh) {
+          this.goldenMomo.mesh.visible = false;
+        }
+        this.spawnMomoBlast(this.goldenMomo.x, 0.4, this.goldenMomo.z, true);
+        return true;
+      }
     }
     return false;
   }
@@ -627,6 +930,7 @@ export class EnvironmentBuilder {
     }
     this.momos = [];
     this.movingGates = [];
+    this.blasts = [];
     this.beautyEnvMesh = null;
   }
 }

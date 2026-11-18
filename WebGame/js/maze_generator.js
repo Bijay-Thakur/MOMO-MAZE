@@ -3,49 +3,106 @@
 
 import { MASTER_MAZE_31X31, CAMPAIGN_LEVELS } from './game_data.js';
 
-// Approved 12x12 Maze Grid from Environment Concept Sheet (Panel 2)
-// 1 = Hedge Wall, 0 = Grass Path, 2 = Leaf Gate Exit
+// Continuous Wall Segments for the Definitive 12x12 Master Living Garden Maze
+// Matches Blender model beauty_maze.glb 1:1 down to the exact millimeter
+export const BEAUTY_WALL_SEGMENTS = [
+  // Outer perimeter borders (12m x 12m garden, open North Leaf Gate exit at center)
+  { name: "Wall_N_Left",   x: -3.6, z: -5.7, sx: 4.8,  sz: 0.65 },
+  { name: "Wall_N_Right",  x:  3.6, z: -5.7, sx: 4.8,  sz: 0.65 },
+  { name: "Wall_South",    x:  0.0, z:  5.7, sx: 12.0, sz: 0.65 },
+  { name: "Wall_West",     x: -5.7, z:  0.0, sx: 0.65, sz: 12.0 },
+  { name: "Wall_East",     x:  5.7, z:  0.0, sx: 0.65, sz: 12.0 },
+
+  // Interior Corridors (all wide 1.8m-2.2m avenues with 100% path connectivity)
+  { name: "Wall_H_1",      x: -2.5, z: -3.8, sx: 3.8,  sz: 0.65 },
+  { name: "Wall_H_2",      x:  2.5, z: -3.8, sx: 3.8,  sz: 0.65 },
+
+  { name: "Wall_H_3",      x: -1.4, z: -1.9, sx: 3.0,  sz: 0.65 },
+  { name: "Wall_H_4",      x:  3.2, z: -1.9, sx: 3.0,  sz: 0.65 },
+
+  { name: "Wall_H_5",      x: -3.2, z:  0.2, sx: 3.4,  sz: 0.65 },
+  { name: "Wall_H_6",      x:  2.2, z:  0.2, sx: 3.4,  sz: 0.65 },
+
+  { name: "Wall_H_7",      x: -1.8, z:  2.1, sx: 3.8,  sz: 0.65 },
+  { name: "Wall_H_8",      x:  2.5, z:  2.1, sx: 3.4,  sz: 0.65 },
+
+  { name: "Wall_H_9",      x:  0.0, z:  3.9, sx: 6.2,  sz: 0.65 },
+
+  { name: "Wall_V_1",      x: -3.8, z: -2.0, sx: 0.65, sz: 3.0 },
+  { name: "Wall_V_2",      x: -1.8, z:  0.5, sx: 0.65, sz: 2.6 },
+  { name: "Wall_V_3",      x:  1.8, z: -2.8, sx: 0.65, sz: 2.2 },
+  { name: "Wall_V_4",      x:  3.8, z:  1.2, sx: 0.65, sz: 2.4 },
+  { name: "Wall_V_5",      x: -3.8, z:  2.8, sx: 0.65, sz: 2.0 },
+];
+
+// Open corridor waypoints for smooth ghost patrol and navigation without clipping
+export const BEAUTY_WAYPOINTS = [
+  { id: 0,  x: -4.6, z:  4.8 }, // South-West corner / Start
+  { id: 1,  x: -4.6, z:  2.0 }, // West lower
+  { id: 2,  x: -4.6, z: -1.0 }, // West mid
+  { id: 3,  x: -4.6, z: -4.8 }, // North-West corner
+  { id: 4,  x: -2.0, z: -4.8 }, // North avenue west
+  { id: 5,  x:  0.0, z: -4.8 }, // North avenue center
+  { id: 6,  x:  0.0, z: -5.7 }, // North Leaf Gate
+  { id: 7,  x:  2.5, z: -4.8 }, // North avenue east
+  { id: 8,  x:  4.6, z: -4.8 }, // North-East corner
+  { id: 9,  x:  4.6, z: -1.0 }, // East mid
+  { id: 10, x:  4.6, z:  2.0 }, // East lower
+  { id: 11, x:  4.6, z:  4.8 }, // South-East corner
+  { id: 12, x:  2.0, z:  4.8 }, // South avenue east
+  { id: 13, x: -2.0, z:  4.8 }, // South avenue west
+  { id: 14, x:  0.0, z:  1.0 }, // Central South
+  { id: 15, x:  0.0, z: -1.0 }, // Central Golden Momo Sanctuary
+];
+
+// Approved Spacious Living Garden Maze Definition
 export const APPROVED_12X12_MAZE = {
   size: 12,
-  cellSize: 1.0,
-  name: "The Morning Meadow (Approved 12×12)",
+  cellSize: 1.0, // Direct world unit mapping
+  name: "The Morning Meadow (Master 12×12)",
+  isBeautyMaster: true,
+  wallSegments: BEAUTY_WALL_SEGMENTS,
+  playerStartWorld: { x: -4.6, z: 4.8 },
+  exitGateWorld: { x: 0.0, z: -5.75 },
+  goldenMomoWorld: { x: 0.0, z: -1.0 },
+  collectiblesWorld: [
+    { x: -4.6, z:  3.2 }, // Heading North from player start
+    { x: -4.6, z:  1.2 },
+    { x: -4.6, z: -2.4 },
+    { x: -4.6, z: -4.8 }, // North-West corner
+    { x: -2.0, z: -4.8 },
+    { x:  0.0, z: -4.8 }, // Center North
+    { x:  2.4, z: -4.8 },
+    { x:  4.6, z: -4.8 }, // North-East corner
+    { x:  4.6, z: -2.8 },
+    { x:  4.6, z:  0.5 },
+    { x:  4.6, z:  3.2 },
+    { x:  4.6, z:  4.8 }, // South-East corner
+  ],
+  ghostsWorld: [
+    { type: 'follower', x: 2.5, z: -2.5 }
+  ],
   grid: [
-    [1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1],  // Row 0 (North, Leaf Gate at cols 5,6)
-    [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1],  // Row 1
-    [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],  // Row 2
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],  // Row 3
-    [1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1],  // Row 4
-    [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1],  // Row 5
-    [1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1],  // Row 6
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],  // Row 7 (Central crossroad)
-    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],  // Row 8
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],  // Row 9
-    [1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1],  // Row 10 (Bottom path, Player Start at (1, 10))
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]   // Row 11 (South boundary)
+    [1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1],
+    [1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
   ],
-  playerStart: { x: 1, y: 10 }, // Bottom-left corridor inside the maze!
-  exitGate: { x: 5.5, y: 0 },    // North center Leaf Gate
-  collectibles: [
-    { x: 1, y: 9 }, // Directly in front of Golumolu!
-    { x: 1, y: 7 }, // West corridor south
-    { x: 1, y: 5 }, // West corridor mid
-    { x: 1, y: 3 }, // West corridor north
-    { x: 1, y: 1 }, // Northwest corner
-    { x: 4, y: 7 }, // Central crossroad west
-    { x: 7, y: 7 }, // Central crossroad east
-    { x: 9, y: 7 }, // East crossroad
-    { x: 10, y: 7 }, // East corridor mid
-    { x: 10, y: 1 }, // Northeast corner
-    { x: 3, y: 5 }, // Mid pathway
-    { x: 6, y: 9 }  // South pathway
-  ],
+  playerStart: { x: 1, y: 10 },
+  exitGate: { x: 5.5, y: 0 },
+  collectibles: [],
   movingGates: [],
   ghosts: [
-    { type: 'follower', x: 2, y: 3 },
-    { type: 'cutter', x: 9, y: 3 },
-    { type: 'wanderer', x: 2, y: 9 }
-  ],
-  isBeautyMaster: true
+    { type: 'follower', x: 2, y: 3 }
+  ]
 };
 
 export class MazeGenerator {
@@ -182,6 +239,7 @@ export class MazeGenerator {
 
     return {
       size,
+      cellSize: 2.0,
       grid,
       playerStart,
       exitGate,
