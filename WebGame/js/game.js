@@ -10,7 +10,7 @@ import { audio } from './audio.js';
 export class MomoGame {
   constructor() {
     this.container = document.getElementById('game-container');
-    this.cellSize = 1.8;
+    this.cellSize = 1.0;
     this.currentSkin = 'cream';
     this.currentLevelId = 1;
     this.isGrand31 = false;
@@ -18,7 +18,7 @@ export class MomoGame {
     // Game state
     this.lives = 3;
     this.collectedMomos = 0;
-    this.targetMomos = 6;
+    this.targetMomos = 12;
     this.elapsedTime = 0;
     this.invulnerableTimer = 0;
 
@@ -28,8 +28,8 @@ export class MomoGame {
 
     // Camera settings
     this.cameraMode = 'iso'; // 'iso' | 'top'
-    this.camDistance = 12;
-    this.camHeight = 14;
+    this.camDistance = 9;
+    this.camHeight = 11;
 
     // Input state
     this.keys = {};
@@ -132,23 +132,30 @@ export class MomoGame {
     // Build a miniature cozy garden preview for the menu using the Blender beauty maze
     this.mazeData = MazeGenerator.generateCampaignLevel(MazeGenerator.getLevelConfig(1));
     this.mazeData.isBeautyMaster = true;
+    this.cellSize = this.mazeData.cellSize || 1.0;
+    this.env.cellSize = this.cellSize;
     this.env.buildMaze(this.mazeData);
 
+    const offset = (this.mazeData.size - 1) / 2;
     this.player = new GolumoluCharacter(this.currentSkin);
-    this.player.group.position.set(0, 0, 0);
+    this.player.gridX = this.mazeData.playerStart.x;
+    this.player.gridY = this.mazeData.playerStart.y;
+    this.player.worldX = (this.player.gridX - offset) * this.cellSize;
+    this.player.worldZ = (this.player.gridY - offset) * this.cellSize;
+    this.player.group.position.set(this.player.worldX, 0, this.player.worldZ);
     this.scene.add(this.player.group);
 
     this.ghosts = [
-      new GhostCharacter('follower', 2, 2, this.cellSize),
-      new GhostCharacter('cutter', -2, 2, this.cellSize)
+      new GhostCharacter('follower', 2, 3, this.cellSize),
+      new GhostCharacter('cutter', 9, 3, this.cellSize)
     ];
     this.ghosts.forEach(g => {
-      g.group.position.set(g.gridX * this.cellSize, 0, g.gridY * this.cellSize);
+      g.group.position.set((g.gridX - offset) * this.cellSize, 0, (g.gridY - offset) * this.cellSize);
       this.scene.add(g.group);
     });
 
-    this.camera.position.set(0, 8, 10);
-    this.camera.lookAt(0, 1, 0);
+    this.camera.position.set(0, 10, 12);
+    this.camera.lookAt(0, 0.5, 0);
   }
 
   startLevel(levelId) {
@@ -172,7 +179,9 @@ export class MomoGame {
     this.currentLevelName = levelName;
     this.lives = 3;
     this.collectedMomos = 0;
-    this.targetMomos = targetMomos;
+    this.cellSize = this.mazeData.cellSize || (this.mazeData.size <= 15 ? 1.0 : 1.2);
+    this.env.cellSize = this.cellSize;
+    this.targetMomos = this.mazeData.collectibles ? this.mazeData.collectibles.length : targetMomos;
     this.elapsedTime = 0;
     this.invulnerableTimer = 0;
     this.activePhase = 'A';
@@ -190,7 +199,7 @@ export class MomoGame {
     // Build environment
     this.env.buildMaze(this.mazeData);
 
-    // Spawn player at start position
+    // Spawn player at start position inside corridor
     const offset = (this.mazeData.size - 1) / 2;
     this.player = new GolumoluCharacter(this.currentSkin);
     this.player.gridX = this.mazeData.playerStart.x;
@@ -200,17 +209,10 @@ export class MomoGame {
     this.player.group.position.set(this.player.worldX, 0, this.player.worldZ);
     this.scene.add(this.player.group);
 
-    // Spawn Ghost Spirits
-    const ghostConfigs = this.isGrand31
+    // Spawn Ghost Spirits (using level config or defaults)
+    const ghostConfigs = this.mazeData.ghosts || (this.isGrand31
       ? [{ type: 'follower', x: 11, y: 15 }, { type: 'cutter', x: 19, y: 15 }, { type: 'wanderer', x: 15, y: 25 }]
-      : [{ type: 'follower', x: this.mazeData.size - 3, y: this.mazeData.size - 3 }];
-
-    if (!this.isGrand31 && this.currentLevelId >= 3) {
-      ghostConfigs.push({ type: 'cutter', x: this.mazeData.size - 3, y: 2 });
-    }
-    if (!this.isGrand31 && this.currentLevelId >= 6) {
-      ghostConfigs.push({ type: 'wanderer', x: 2, y: this.mazeData.size - 3 });
-    }
+      : [{ type: 'follower', x: this.mazeData.size - 3, y: this.mazeData.size - 3 }]);
 
     ghostConfigs.forEach(cfg => {
       const ghost = new GhostCharacter(cfg.type, cfg.x, cfg.y, this.cellSize);
@@ -310,21 +312,30 @@ export class MomoGame {
 
       // Collision detection against walls & moving gates
       const offset = (this.mazeData.size - 1) / 2;
-      const radius = 0.38;
+      const r = 0.28; // Player collision radius
+
+      const isCellPassable = (cx, cy) => {
+        if (cx < 0 || cx >= this.mazeData.size || cy < 0 || cy >= this.mazeData.size) return false;
+        const cell = this.mazeData.grid[cy][cx];
+        if (cell === 1) return false; // Hedge Wall
+        if (cell === 2 && this.activePhase === 'A') return false; // Gate A closed
+        if (cell === 3 && this.activePhase === 'B') return false; // Gate B closed
+        return true;
+      };
 
       const canMoveTo = (wx, wz) => {
-        const gx = Math.round(wx / this.cellSize + offset);
-        const gy = Math.round(wz / this.cellSize + offset);
-        if (gx < 0 || gx >= this.mazeData.size || gy < 0 || gy >= this.mazeData.size) return false;
-
-        const cell = this.mazeData.grid[gy][gx];
-        if (cell === 1) return false; // Wall
-
-        // Moving Gates
-        if (cell === 2 && this.activePhase === 'A') return false; // Gate A closed in Phase A
-        if (cell === 3 && this.activePhase === 'B') return false; // Gate B closed in Phase B
-
-        return true;
+        // Test corners around player
+        const corners = [
+          [wx - r, wz - r],
+          [wx + r, wz - r],
+          [wx - r, wz + r],
+          [wx + r, wz + r]
+        ];
+        return corners.every(([cx, cz]) => {
+          const gx = Math.round(cx / this.cellSize + offset);
+          const gy = Math.round(cz / this.cellSize + offset);
+          return isCellPassable(gx, gy);
+        });
       };
 
       // Slide along walls (test X and Z independently)
@@ -352,27 +363,36 @@ export class MomoGame {
   }
 
   checkMomoCollection() {
-    const pX = Math.round(this.player.gridX);
-    const pY = Math.round(this.player.gridY);
+    const pPos = this.player.group.position;
+    for (const m of this.env.momos) {
+      if (!m.collected) {
+        const dist = Math.hypot(pPos.x - m.mesh.position.x, pPos.z - m.mesh.position.z);
+        if (dist < 0.75) {
+          if (this.env.collectMomo(m.gridX, m.gridY)) {
+            this.collectedMomos++;
+            this.player.triggerEat();
+            audio.playCollectMomo();
 
-    if (this.env.collectMomo(pX, pY)) {
-      this.collectedMomos++;
-      this.player.triggerEat();
-      audio.playCollectMomo();
-
-      // Check if all collected
-      if (this.collectedMomos >= this.targetMomos) {
-        audio.playCollectGolden();
+            // Check if all collected
+            if (this.collectedMomos >= this.targetMomos) {
+              audio.playCollectGolden();
+            }
+            break;
+          }
+        }
       }
     }
   }
 
   checkExitGate() {
     if (this.collectedMomos < this.targetMomos) return;
-    const pX = Math.round(this.player.gridX);
-    const pY = Math.round(this.player.gridY);
+    const pPos = this.player.group.position;
+    const offset = (this.mazeData.size - 1) / 2;
+    const exitWX = (this.mazeData.exitGate.x - offset) * this.cellSize;
+    const exitWZ = (this.mazeData.exitGate.y - offset) * this.cellSize;
+    const dist = Math.hypot(pPos.x - exitWX, pPos.z - exitWZ);
 
-    if (pX === this.mazeData.exitGate.x && pY === this.mazeData.exitGate.y) {
+    if (dist < 1.3) {
       // Victory!
       this.ui.showVictory({
         levelName: this.currentLevelName,

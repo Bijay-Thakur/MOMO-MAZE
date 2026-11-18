@@ -46,8 +46,8 @@ export class GhostCharacter {
     this.currentPath = [];
     this.pathTimer = 0;
 
-    // Scale up to Hero Size (1.9x) so Spirits are big and match Golumolu!
-    this.group.scale.set(1.9, 1.9, 1.9);
+    // Scale to fit corridor width (1.0m) comfortably while remaining distinct & prominent
+    this.group.scale.set(1.0, 1.0, 1.0);
 
     this.buildMesh();
     this.loadGLBModel();
@@ -59,13 +59,9 @@ export class GhostCharacter {
       modelPath,
       (gltf) => {
         const glbScene = gltf.scene;
-        // Normalize size and center
-        const box = new THREE.Box3().setFromObject(glbScene);
-        const size = box.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const targetSize = 1.1;
-        const s = targetSize / (maxDim || 1);
-        glbScene.scale.set(s, s, s);
+        // 1:1 scale matching corridor width 1.0m
+        glbScene.scale.set(1.0, 1.0, 1.0);
+        glbScene.position.set(0, 0, 0);
 
         glbScene.traverse(child => {
           if (child.isMesh) {
@@ -120,35 +116,43 @@ export class GhostCharacter {
     });
 
     // 1. Round fluffy head
-    const headGeo = new THREE.SphereGeometry(0.36, 20, 16);
+    const headGeo = new THREE.SphereGeometry(0.35, 24, 20);
     this.headMesh = new THREE.Mesh(headGeo, matGhost);
-    this.headMesh.position.y = 0.55;
+    this.headMesh.position.y = 0.45;
     this.headMesh.castShadow = true;
     this.proceduralRoot.add(this.headMesh);
 
-    // 2. ELONGATED Wispy Flying Tail (8 trailing segments spanning 1.8m behind!)
-    this.tailSegments = [];
-    const tailSizes = [0.32, 0.28, 0.23, 0.18, 0.14, 0.10, 0.07, 0.04];
-    tailSizes.forEach((radius, i) => {
-      const segGeo = new THREE.SphereGeometry(radius, 12, 10);
-      const seg = new THREE.Mesh(segGeo, matGhost);
-      // Staggered along Z (backwards) and slightly curved down
-      seg.position.set(0, 0.44 - i * 0.04, -i * 0.16);
-      seg.castShadow = true;
-      this.proceduralRoot.add(seg);
-      this.tailSegments.push(seg);
-    });
+    // 2. Flowing Wisp Ribbon Tail (soft curved mantle billowing upwards & back, NO spikes, NO cones!)
+    const curvePoints = [
+      new THREE.Vector3(0, 0.42, 0.05),
+      new THREE.Vector3(0, 0.45, -0.22),
+      new THREE.Vector3(0, 0.52, -0.50),
+      new THREE.Vector3(0, 0.62, -0.76)
+    ];
+    const curve = new THREE.CatmullRomCurve3(curvePoints);
+    const tailGeo = new THREE.TubeGeometry(curve, 24, 0.16, 12, false);
+    this.mainTail = new THREE.Mesh(tailGeo, matGhost);
+    this.mainTail.castShadow = true;
+    this.proceduralRoot.add(this.mainTail);
 
-    // 3. Side floating wisps/fins
-    const finGeo = new THREE.SphereGeometry(0.12, 10, 8);
-    finGeo.scale(1.8, 0.4, 0.9);
+    // Rounded cloud puff at tail end
+    const puffGeo = new THREE.SphereGeometry(0.14, 14, 10);
+    const puff = new THREE.Mesh(puffGeo, matGhost);
+    puff.position.set(0, 0.62, -0.76);
+    this.proceduralRoot.add(puff);
+
+    this.tailSegments = [];
+
+    // 3. Side floating wisps/wings
+    const finGeo = new THREE.SphereGeometry(0.12, 12, 10);
+    finGeo.scale(1.8, 0.45, 1.2);
     this.finL = new THREE.Mesh(finGeo, matGhost);
-    this.finL.position.set(-0.32, 0.46, -0.05);
+    this.finL.position.set(-0.30, 0.42, -0.05);
     this.finL.rotation.z = -0.3;
     this.proceduralRoot.add(this.finL);
 
     this.finR = new THREE.Mesh(finGeo, matGhost);
-    this.finR.position.set(0.32, 0.46, -0.05);
+    this.finR.position.set(0.30, 0.42, -0.05);
     this.finR.rotation.z = 0.3;
     this.proceduralRoot.add(this.finR);
 

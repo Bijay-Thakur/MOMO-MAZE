@@ -223,6 +223,7 @@ export class EnvironmentBuilder {
   buildMaze(mazeData, onReady = null) {
     this.clear();
     const size = mazeData.size;
+    this.cellSize = mazeData.cellSize || (size <= 15 ? 1.0 : 1.2);
     const grid = mazeData.grid;
     const offset = (size - 1) / 2;
 
@@ -230,7 +231,7 @@ export class EnvironmentBuilder {
     this.scene.add(this.root);
 
     // If level has beauty model enabled or is Level 1, load the Blender master scene!
-    const isBeautyMaster = mazeData.isBeautyMaster || mazeData.isGrand31 === false && size <= 15;
+    const isBeautyMaster = mazeData.isBeautyMaster || (mazeData.isGrand31 === false && size <= 15);
 
     if (isBeautyMaster) {
       this.loadBlenderBeautyScene(mazeData, offset, onReady);
@@ -252,13 +253,9 @@ export class EnvironmentBuilder {
       (gltf) => {
         const glb = gltf.scene;
 
-        // Auto-scale to match current maze grid dimension
-        const box = new THREE.Box3().setFromObject(glb);
-        const sizeVec = box.getSize(new THREE.Vector3());
-        const targetWidth = mazeData.size * this.cellSize;
-        const scaleFactor = targetWidth / (sizeVec.x || 12.0);
-
-        glb.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        // The Blender beauty maze model is natively 12x12 meters with 1.0m cell spacing.
+        // Scale 1:1 aligns perfectly with grid coordinates (c - 5.5) * 1.0!
+        glb.scale.set(1.0, 1.0, 1.0);
         glb.position.set(0, 0, 0);
 
         glb.traverse(child => {
