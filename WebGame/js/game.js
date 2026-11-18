@@ -28,8 +28,8 @@ export class MomoGame {
 
     // Camera settings
     this.cameraMode = 'iso'; // 'iso' | 'top'
-    this.camDistance = 14;
-    this.camHeight = 16;
+    this.camDistance = 12;
+    this.camHeight = 14;
 
     // Input state
     this.keys = {};
@@ -129,8 +129,9 @@ export class MomoGame {
   }
 
   setupMenuDiorama() {
-    // Build a miniature cozy garden preview for the menu
+    // Build a miniature cozy garden preview for the menu using the Blender beauty maze
     this.mazeData = MazeGenerator.generateCampaignLevel(MazeGenerator.getLevelConfig(1));
+    this.mazeData.isBeautyMaster = true;
     this.env.buildMaze(this.mazeData);
 
     this.player = new GolumoluCharacter(this.currentSkin);
@@ -155,6 +156,9 @@ export class MomoGame {
     this.isGrand31 = false;
     const config = MazeGenerator.getLevelConfig(levelId);
     this.mazeData = MazeGenerator.generateCampaignLevel(config);
+    if (levelId === 1) {
+      this.mazeData.isBeautyMaster = true;
+    }
     this.initPlaySession(config.name, config.target_momos, !!config.has_moving_gates);
   }
 

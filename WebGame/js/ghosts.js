@@ -1,6 +1,7 @@
 // 3 Ghost Spirits 3D Models & AI for MOMO MAZE
-// Follower, Cutter, Wanderer matching Asset Spec
+// Follower, Cutter, Wanderer with Hero Scaling & Elongated Flying Tails
 import * as THREE from './three.module.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MazeGenerator } from './maze_generator.js';
 
 export const GHOST_TYPES = {
@@ -30,6 +31,8 @@ export const GHOST_TYPES = {
   }
 };
 
+const gltfLoader = new GLTFLoader();
+
 export class GhostCharacter {
   constructor(typeKey = 'follower', startGridX = 1, startGridY = 1, cellSize = 1.8) {
     this.typeKey = typeKey;
@@ -43,12 +46,59 @@ export class GhostCharacter {
     this.currentPath = [];
     this.pathTimer = 0;
 
+    // Scale up to Hero Size (1.9x) so Spirits are big and match Golumolu!
+    this.group.scale.set(1.9, 1.9, 1.9);
+
     this.buildMesh();
+    this.loadGLBModel();
+  }
+
+  loadGLBModel() {
+    const modelPath = `models/ghost_${this.typeKey}.glb`;
+    gltfLoader.load(
+      modelPath,
+      (gltf) => {
+        const glbScene = gltf.scene;
+        // Normalize size and center
+        const box = new THREE.Box3().setFromObject(glbScene);
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const targetSize = 1.1;
+        const s = targetSize / (maxDim || 1);
+        glbScene.scale.set(s, s, s);
+
+        glbScene.traverse(child => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            if (child.material) {
+              child.material.transparent = true;
+              child.material.opacity = 0.92;
+            }
+          }
+        });
+
+        // Hide procedural mesh and show GLB
+        if (this.proceduralRoot) {
+          this.proceduralRoot.visible = false;
+        }
+        this.glbMesh = glbScene;
+        this.modelRoot.add(glbScene);
+      },
+      undefined,
+      (err) => {
+        // Fallback to procedural mesh silently
+        console.log(`Using procedural model for ghost ${this.typeKey}`);
+      }
+    );
   }
 
   buildMesh() {
     this.modelRoot = new THREE.Group();
     this.group.add(this.modelRoot);
+
+    this.proceduralRoot = new THREE.Group();
+    this.modelRoot.add(this.proceduralRoot);
 
     // Main spirit translucent material
     const matGhost = new THREE.MeshStandardMaterial({
@@ -73,72 +123,88 @@ export class GhostCharacter {
     const headGeo = new THREE.SphereGeometry(0.36, 20, 16);
     this.headMesh = new THREE.Mesh(headGeo, matGhost);
     this.headMesh.position.y = 0.55;
-    this.modelRoot.add(this.headMesh);
+    this.headMesh.castShadow = true;
+    this.proceduralRoot.add(this.headMesh);
 
-    // 2. Tapered Wispy Tail (multiple soft spheres or cone)
+    // 2. ELONGATED Wispy Flying Tail (8 trailing segments spanning 1.8m behind!)
     this.tailSegments = [];
-    const tailSizes = [0.26, 0.18, 0.11, 0.06];
+    const tailSizes = [0.32, 0.28, 0.23, 0.18, 0.14, 0.10, 0.07, 0.04];
     tailSizes.forEach((radius, i) => {
       const segGeo = new THREE.SphereGeometry(radius, 12, 10);
       const seg = new THREE.Mesh(segGeo, matGhost);
-      seg.position.set(0, 0.38 - i * 0.12, -i * 0.08);
-      this.modelRoot.add(seg);
+      // Staggered along Z (backwards) and slightly curved down
+      seg.position.set(0, 0.44 - i * 0.04, -i * 0.16);
+      seg.castShadow = true;
+      this.proceduralRoot.add(seg);
       this.tailSegments.push(seg);
     });
 
-    // 3. Eyes based on personality
+    // 3. Side floating wisps/fins
+    const finGeo = new THREE.SphereGeometry(0.12, 10, 8);
+    finGeo.scale(1.8, 0.4, 0.9);
+    this.finL = new THREE.Mesh(finGeo, matGhost);
+    this.finL.position.set(-0.32, 0.46, -0.05);
+    this.finL.rotation.z = -0.3;
+    this.proceduralRoot.add(this.finL);
+
+    this.finR = new THREE.Mesh(finGeo, matGhost);
+    this.finR.position.set(0.32, 0.46, -0.05);
+    this.finR.rotation.z = 0.3;
+    this.proceduralRoot.add(this.finR);
+
+    // 4. Eyes based on personality
     if (this.spec.eyeType === 'round') {
       // Follower: Round, cute dots with highlight
       const eyeGeo = new THREE.SphereGeometry(0.045, 12, 10);
       const leftEye = new THREE.Mesh(eyeGeo, matEyes);
       leftEye.position.set(-0.11, 0.58, 0.32);
-      this.modelRoot.add(leftEye);
+      this.proceduralRoot.add(leftEye);
 
       const rightEye = new THREE.Mesh(eyeGeo, matEyes);
       rightEye.position.set(0.11, 0.58, 0.32);
-      this.modelRoot.add(rightEye);
+      this.proceduralRoot.add(rightEye);
 
       const glintGeo = new THREE.SphereGeometry(0.015, 8, 8);
       const glintL = new THREE.Mesh(glintGeo, matEyeWhite);
       glintL.position.set(-0.095, 0.60, 0.35);
-      this.modelRoot.add(glintL);
+      this.proceduralRoot.add(glintL);
 
       const glintR = new THREE.Mesh(glintGeo, matEyeWhite);
       glintR.position.set(0.125, 0.60, 0.35);
-      this.modelRoot.add(glintR);
+      this.proceduralRoot.add(glintR);
     } else if (this.spec.eyeType === 'angled') {
       // Cutter: Angled mischievous eyes
       const eyeGeo = new THREE.CylinderGeometry(0.02, 0.05, 0.11, 10);
       const leftEye = new THREE.Mesh(eyeGeo, matEyes);
       leftEye.position.set(-0.12, 0.58, 0.32);
       leftEye.rotation.z = 0.45;
-      this.modelRoot.add(leftEye);
+      this.proceduralRoot.add(leftEye);
 
       const rightEye = new THREE.Mesh(eyeGeo, matEyes);
       rightEye.position.set(0.12, 0.58, 0.32);
       rightEye.rotation.z = -0.45;
-      this.modelRoot.add(rightEye);
+      this.proceduralRoot.add(rightEye);
     } else {
       // Wanderer: Wide starry / dreamy eyes
       const eyeGeo = new THREE.SphereGeometry(0.052, 14, 10);
       const leftEye = new THREE.Mesh(eyeGeo, matEyes);
       leftEye.position.set(-0.12, 0.58, 0.32);
-      this.modelRoot.add(leftEye);
+      this.proceduralRoot.add(leftEye);
 
       const rightEye = new THREE.Mesh(eyeGeo, matEyes);
       rightEye.position.set(0.12, 0.58, 0.32);
-      this.modelRoot.add(rightEye);
+      this.proceduralRoot.add(rightEye);
 
       // Star twinkles
       const starGeo = new THREE.SphereGeometry(0.02, 8, 8);
       const starMat = new THREE.MeshBasicMaterial({ color: 0xFFF9C4 });
       const starL = new THREE.Mesh(starGeo, starMat);
       starL.position.set(-0.10, 0.60, 0.355);
-      this.modelRoot.add(starL);
+      this.proceduralRoot.add(starL);
 
       const starR = new THREE.Mesh(starGeo, starMat);
       starR.position.set(0.14, 0.60, 0.355);
-      this.modelRoot.add(starR);
+      this.proceduralRoot.add(starR);
     }
 
     // Rosy cheeks for Follower & Wanderer
@@ -149,30 +215,44 @@ export class GhostCharacter {
       const bL = new THREE.Mesh(blushGeo, blushMat);
       bL.position.set(-0.18, 0.49, 0.30);
       bL.rotation.y = -0.3;
-      this.modelRoot.add(bL);
+      this.proceduralRoot.add(bL);
 
       const bR = new THREE.Mesh(blushGeo, blushMat);
       bR.position.set(0.18, 0.49, 0.30);
       bR.rotation.y = 0.3;
-      this.modelRoot.add(bR);
+      this.proceduralRoot.add(bR);
     }
 
     // Point light for ethereal glowing aura
-    this.light = new THREE.PointLight(this.spec.glow, 1.2, 3.8);
+    this.light = new THREE.PointLight(this.spec.glow, 1.4, 4.2);
     this.light.position.set(0, 0.6, 0);
     this.group.add(this.light);
   }
 
   update(delta, player, grid, gridSize, activePhase) {
-    this.floatCycle += delta * 3.5;
-    const hover = Math.sin(this.floatCycle) * 0.12;
+    this.floatCycle += delta * 3.8;
+    const hover = Math.sin(this.floatCycle) * 0.16;
     this.modelRoot.position.y = hover;
 
-    // Tail waving effect
+    // Swimming wave animation for elongated tail
     this.tailSegments.forEach((seg, i) => {
-      seg.position.x = Math.sin(this.floatCycle - i * 0.8) * (0.04 * (i + 1));
-      seg.position.z = -i * 0.08 + Math.cos(this.floatCycle - i * 0.8) * 0.03;
+      // Propagating horizontal wave
+      seg.position.x = Math.sin(this.floatCycle - i * 0.6) * (0.05 * (i + 1));
+      // Subtle vertical ripple
+      seg.position.y = 0.44 - i * 0.04 + Math.cos(this.floatCycle - i * 0.5) * (0.025 * (i + 1));
+      seg.position.z = -i * 0.16 + Math.sin(this.floatCycle * 0.5 - i * 0.4) * 0.02;
     });
+
+    if (this.finL && this.finR) {
+      this.finL.rotation.z = -0.3 + Math.sin(this.floatCycle * 1.5) * 0.2;
+      this.finR.rotation.z = 0.3 - Math.sin(this.floatCycle * 1.5) * 0.2;
+    }
+
+    // Subtle pitch/roll of GLB mesh if loaded
+    if (this.glbMesh) {
+      this.glbMesh.rotation.z = Math.sin(this.floatCycle) * 0.08;
+      this.glbMesh.rotation.x = Math.cos(this.floatCycle * 0.8) * 0.06;
+    }
 
     // AI Path recalculation (every 0.4s)
     this.pathTimer -= delta;
